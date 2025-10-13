@@ -1,0 +1,39 @@
+syntax = "v1"
+
+info (
+    title: "User Authentication API"
+    desc: "Handles registration, login, logout for test prep users. Uses JWT for sessions."
+    author: "zx"
+    date: "2025-10-13 16:39:11"
+    version: "1.0"
+)
+
+type RegisterRequest {
+    Username string `json:"username, min=3, max=20"`
+    Email string `json:"email"`
+    Password string `json:"password, min=8"`
+}
+
+type RegisterResponse {
+    UserId int64 `json:"user_id"`
+    Token string `json:"token"`
+    Message string `json:"message"`
+}
+
+type LoginRequest {
+    Email string `json:"email"`
+    Password string `json:"password"`
+}
+
+type LoginResponse {
+    UserId int64 `json:"user_id"`
+    Token string `json:"token"`
+    ExpiresIn int64 `json:"expires_in, default=3600"`
+}
+
+type LogoutResponse {
+    Message string `json:"message"`
+}
+
+
+
