@@ -4,7 +4,7 @@ import "base.api"
 
 service Deutsch {
 	@handler ping
-	get /ping (string)
+	get /ping
 }
 
 import "auth.api"
