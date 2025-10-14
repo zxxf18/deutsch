@@ -5,14 +5,18 @@ package svc
 
 import (
 	"deutsch/internal/config"
+	"deutsch/internal/middleware"
+	"github.com/zeromicro/go-zero/rest"
 )
 
 type ServiceContext struct {
-	Config config.Config
+	Config        config.Config
+	JWTMiddleware rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
-		Config: c,
+		Config:        c,
+		JWTMiddleware: middleware.NewJWTMiddleware().Handle,
 	}
 }

@@ -1,0 +1,14 @@
+syntax = "v1"
+
+info(
+    title: "API Base"
+    desc: "Base types"
+    author: "zx"
+    date: "2025-10-13 16:39:11"
+    version: "1.0"
+)
+
+type Base {
+    Code int    `json:"code"`
+    Msg  string `json:"msg"`
+}

@@ -1,6 +1,8 @@
 syntax = "v1"
 
-info (
+import "base.api"
+
+info(
     title: "User Authentication API"
     desc: "Handles registration, login, logout for test prep users. Uses JWT for sessions."
     author: "zx"
@@ -15,9 +17,11 @@ type RegisterRequest {
 }
 
 type RegisterResponse {
-    UserId int64 `json:"user_id"`
-    Token string `json:"token"`
-    Message string `json:"message"`
+    Base
+    Data {
+        UserId int64 `json:"user_id"`
+        Token string `json:"token"`
+    } `json:"data"`
 }
 
 type LoginRequest {
@@ -26,13 +30,16 @@ type LoginRequest {
 }
 
 type LoginResponse {
-    UserId int64 `json:"user_id"`
-    Token string `json:"token"`
-    ExpiresIn int64 `json:"expires_in, default=3600"`
+    Base
+    Data {
+        UserId int64 `json:"user_id"`
+        Token string `json:"token"`
+        ExpiresIn int64 `json:"expires_in"`
+    } `json:"data"`
 }
 
 type LogoutResponse {
-    Message string `json:"message"`
+    Base
 }
 
 

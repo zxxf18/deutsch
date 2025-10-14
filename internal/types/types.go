@@ -3,19 +3,27 @@
 
 package types
 
+type Base struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type LoginResponse struct {
-	UserId    int64  `json:"user_id"`
-	Token     string `json:"token"`
-	ExpiresIn int64  `json:"expires_in, default=3600"`
+	Base
+	Data struct {
+		UserId    int64  `json:"user_id"`
+		Token     string `json:"token"`
+		ExpiresIn int64  `json:"expires_in"`
+	} `json:"data"`
 }
 
 type LogoutResponse struct {
-	Message string `json:"message"`
+	Base
 }
 
 type RegisterRequest struct {
@@ -25,7 +33,9 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	UserId  int64  `json:"user_id"`
-	Token   string `json:"token"`
-	Message string `json:"message"`
+	Base
+	Data struct {
+		UserId int64  `json:"user_id"`
+		Token  string `json:"token"`
+	} `json:"data"`
 }

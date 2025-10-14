@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	auth "deutsch/internal/handler/auth"
 	"deutsch/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -24,24 +25,28 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodPost,
-				Path:    "/auth/login",
-				Handler: LoginHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/auth/logout",
-				Handler: LogoutHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/auth/register",
-				Handler: RegisterHandler(serverCtx),
-			},
-		},
-		rest.WithPrefix("/api/v1"),
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/login",
+					Handler: auth.LoginHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/logout",
+					Handler: auth.LogoutHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/register",
+					Handler: auth.RegisterHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/auth"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)
 }
