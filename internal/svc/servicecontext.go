@@ -4,9 +4,10 @@
 package svc
 
 import (
+	"github.com/zeromicro/go-zero/rest"
+
 	"deutsch/internal/config"
 	"deutsch/internal/middleware"
-	"github.com/zeromicro/go-zero/rest"
 )
 
 type ServiceContext struct {

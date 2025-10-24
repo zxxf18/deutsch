@@ -2,7 +2,7 @@
 package jwt
 
 import (
-	"context"
+	"net/http"
 	"time"
 )
 
@@ -12,9 +12,12 @@ type JWTInfo struct {
 	MaxRefresh time.Time `json:"maxRefresh"`
 }
 
+// JWT
+// 因为 Auth 层采用 go-zero 框架的 github.com/zeromicro/go-zero/rest 包下的解析逻辑
+// 所以这里也采用同样版本的 jwt 生成和校验逻辑
 type JWT interface {
-	GetJWT(c context.Context) (string, error)
-	GenerateJWT(c context.Context) (*JWTInfo, error)
-	RefreshJWT(c context.Context) (*JWTInfo, error)
-	CheckAndParseJWT(c context.Context) (map[string]any, error)
+	GetJWT(r *http.Request) (string, error)
+	GenerateJWT(data any) (*JWTInfo, error)
+	RefreshJWT(r *http.Request) (*JWTInfo, error)
+	CheckAndParseJWT(r *http.Request) (map[string]any, error)
 }

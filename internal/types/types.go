@@ -8,17 +8,29 @@ type Base struct {
 	Msg  string `json:"msg"`
 }
 
+type GenerateInviteRequest struct {
+	Count int32 `json:"count,optional,default=1"` // 生成邀请码数量
+}
+
+type GenerateInviteResponse struct {
+	Base
+	Data struct {
+		Codes []string `json:"codes"`
+	} `json:"data"`
+}
+
 type LoginRequest struct {
-	Email    string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 type LoginResponse struct {
 	Base
 	Data struct {
-		UserId    int64  `json:"user_id"`
-		Token     string `json:"token"`
-		ExpiresIn int64  `json:"expires_in"`
+		UserId    string `json:"user_id"`
+		JWTToken  string `json:"jwt_token"`
+		ExpiresIn int64  `json:"expires_in,default=3600"`
+		Role      string `json:"role"` // 返回角色
 	} `json:"data"`
 }
 
@@ -27,15 +39,17 @@ type LogoutResponse struct {
 }
 
 type RegisterRequest struct {
-	Username string `json:"username, min=3, max=20"`
-	Email    string `json:"email"`
-	Password string `json:"password, min=8"`
+	Phone      string `json:"phone"`
+	Password   string `json:"password,min=8"`
+	Username   string `json:"username,min=3,max=50"`
+	Nickname   string `json:"nickname,optional"`
+	InviteCode string `json:"invite_code"` // 必填邀请码
 }
 
 type RegisterResponse struct {
 	Base
 	Data struct {
-		UserId int64  `json:"user_id"`
-		Token  string `json:"token"`
+		UserId   int64  `json:"user_id"`
+		JWTToken string `json:"jwt_token"`
 	} `json:"data"`
 }

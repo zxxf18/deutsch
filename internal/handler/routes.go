@@ -25,23 +25,35 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/auth/login",
+				Handler: auth.LoginHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/auth/register",
+				Handler: auth.RegisterHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1/auth"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
 		rest.WithMiddlewares(
 			[]rest.Middleware{serverCtx.JWTMiddleware},
 			[]rest.Route{
 				{
 					Method:  http.MethodPost,
-					Path:    "/login",
-					Handler: auth.LoginHandler(serverCtx),
+					Path:    "/invite/generate",
+					Handler: auth.GenerateInviteHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
 					Path:    "/logout",
 					Handler: auth.LogoutHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPost,
-					Path:    "/register",
-					Handler: auth.RegisterHandler(serverCtx),
 				},
 			}...,
 		),

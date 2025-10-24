@@ -1,15 +1,16 @@
-// Package jwt jwt插件
 package jwt
 
 import (
 	"context"
 	"crypto/rsa"
 	"errors"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/rest/token"
 )
 
 const (
@@ -75,7 +76,7 @@ type JWTHelper struct {
 	// Optional, default is HS256.
 	SigningAlgorithm string
 	// Secret key used for signing. Required.
-	Key []byte
+	Key string
 	// Private key file for asymmetric algorithms
 	PrivKeyFile string
 	// Public key file for asymmetric algorithms
@@ -86,6 +87,9 @@ type JWTHelper struct {
 	// Public key
 	pubKey *rsa.PublicKey
 
+	// 采用 go-zero 框架的 parser ，逻辑为从 header 的 Authorization 中获取 token 并解析
+	parser *token.TokenParser
+
 	ctx context.Context
 }
 
@@ -94,9 +98,10 @@ func NewJWTHelper(cfg JWTConfig) (*JWTHelper, error) {
 		Timeout:          cfg.Timeout,
 		MaxRefresh:       cfg.MaxRefresh,
 		SigningAlgorithm: cfg.SigningAlgorithm,
-		Key:              []byte(cfg.Key),
+		Key:              cfg.Key,
 		PrivKeyFile:      cfg.PrivKeyFile,
 		PubKeyFile:       cfg.PubKeyFile,
+		parser:           token.NewTokenParser(),
 		ctx:              logx.ContextWithFields(context.Background(), logx.Field("pkg", "jwt")),
 	}
 	if helper.usingPublicKeyAlgo() {
@@ -111,21 +116,11 @@ func NewJWTHelper(cfg JWTConfig) (*JWTHelper, error) {
 }
 
 // ParseToken parse jwt token from context
-//func (j *JWTHelper) parseToken(c context.Context) (*jwt.Token, error) {
-//	val := c.Value(JWTKey)
-//	token, ok := val.(string)
-//	if !ok {
-//		return nil, ErrInvalidToken
-//	}
-//
-//	jtoken, err := jwt.Parse(token, j.keyFunc)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return jtoken, nil
-//}
+func (j *JWTHelper) parseToken(r *http.Request) (*jwt.Token, error) {
+	return j.parser.ParseToken(r, j.Key, "")
+}
 
-func (j *JWTHelper) keyFunc(t *jwt.Token) (interface{}, error) {
+func (j *JWTHelper) keyFunc(t *jwt.Token) (any, error) {
 	if jwt.GetSigningMethod(j.SigningAlgorithm) != t.Method {
 		return nil, ErrInvalidSigningAlgorithm
 	}
@@ -182,7 +177,7 @@ func (j *JWTHelper) usingPublicKeyAlgo() bool {
 	return false
 }
 
-func (j *JWTHelper) Generate(claims map[string]interface{}) (token string, expire time.Time, err error) {
+func (j *JWTHelper) Generate(claims map[string]any) (token string, expire time.Time, err error) {
 	now := time.Now()
 	expire = now.Add(j.Timeout)
 	claims[JWTExpore] = expire.Unix()
@@ -201,24 +196,24 @@ func (j *JWTHelper) Generate(claims map[string]interface{}) (token string, expir
 	return
 }
 
-func (j *JWTHelper) Refresh(c context.Context) (string, time.Time, error) {
-	claims, err := j.CheckMaxRefreshAndParse(c)
+func (j *JWTHelper) Refresh(r *http.Request) (string, time.Time, error) {
+	claims, err := j.CheckMaxRefreshAndParse(r)
 	if err != nil {
 		return "", time.Now(), err
 	}
 	return j.Generate(claims)
 }
 
-func (j *JWTHelper) CheckExpireAndParse(c context.Context) (map[string]interface{}, error) {
-	return j.checkAndParse(c, j.Timeout)
+func (j *JWTHelper) CheckExpireAndParse(r *http.Request) (map[string]any, error) {
+	return j.checkAndParse(r, j.Timeout)
 }
 
-func (j *JWTHelper) CheckMaxRefreshAndParse(c context.Context) (map[string]interface{}, error) {
-	return j.checkAndParse(c, j.MaxRefresh)
+func (j *JWTHelper) CheckMaxRefreshAndParse(r *http.Request) (map[string]any, error) {
+	return j.checkAndParse(r, j.MaxRefresh)
 }
 
-func (j *JWTHelper) checkAndParse(c context.Context, offset time.Duration) (map[string]interface{}, error) {
-	jtoken, err := j.parseToken(c)
+func (j *JWTHelper) checkAndParse(r *http.Request, offset time.Duration) (map[string]any, error) {
+	jtoken, err := j.parser.ParseToken(r, j.Key, "")
 	if err != nil {
 		validationErr, ok := err.(*jwt.ValidationError)
 		if !ok || validationErr.Errors != jwt.ValidationErrorExpired {

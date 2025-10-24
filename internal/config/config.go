@@ -9,6 +9,6 @@ type Config struct {
 	rest.RestConf
 	JWTAuth struct {
 		AccessSecret string
-		AccessExpire int64
+		AccessExpire int64 // 单位是s
 	}
 }

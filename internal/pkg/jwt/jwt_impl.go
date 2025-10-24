@@ -2,11 +2,11 @@ package jwt
 
 import (
 	"context"
+	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4/request"
 	"github.com/zeromicro/go-zero/core/logx"
-
-	"deutsch/internal/pkg/utils"
 )
 
 type JWTConfig struct {
@@ -16,7 +16,6 @@ type JWTConfig struct {
 	PubKeyFile       string        `yaml:"pubKeyFile" json:"pubKeyFile"`
 	Timeout          time.Duration `yaml:"timeout" json:"timeout" default:"30m"`
 	MaxRefresh       time.Duration `yaml:"maxRefresh" json:"maxRefresh" default:"1h"`
-	JWTKey           string        `yaml:"jwtkey" json:"jwtkey" default:"jwt"`
 }
 
 type defaultJWT struct {
@@ -25,11 +24,15 @@ type defaultJWT struct {
 	helper *JWTHelper
 }
 
-func New(ctx context.Context) (any, error) {
-	var cfg JWTConfig
-	if err := utils.LoadConfig(&cfg); err != nil {
-		return nil, err
+func DefaultJWTConfig(secret string, expire int64) *JWTConfig {
+	return &JWTConfig{
+		Key:        secret,
+		Timeout:    time.Duration(expire) * time.Second,
+		MaxRefresh: time.Duration(expire*2) * time.Second,
 	}
+}
+
+func NewWithConfig(ctx context.Context, cfg JWTConfig) (any, error) {
 	helper, err := NewJWTHelper(cfg)
 	if err != nil {
 		return nil, err
@@ -41,7 +44,20 @@ func New(ctx context.Context) (any, error) {
 	}, nil
 }
 
-func (d *defaultJWT) GenerateJWT(c context.Context, data any) (*JWTInfo, error) {
+func New(ctx context.Context, secret string, expire int64) (any, error) {
+	cfg := DefaultJWTConfig(secret, expire)
+	helper, err := NewJWTHelper(*cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &defaultJWT{
+		cfg:    *cfg,
+		helper: helper,
+		ctx:    logx.ContextWithFields(ctx, logx.Field("pkg", "defaultJWT")),
+	}, nil
+}
+
+func (d *defaultJWT) GenerateJWT(data any) (*JWTInfo, error) {
 	claims := map[string]any{
 		JWTKey: data,
 	}
@@ -56,15 +72,8 @@ func (d *defaultJWT) GenerateJWT(c context.Context, data any) (*JWTInfo, error) 
 	}, nil
 }
 
-// GenerateDefaultJWT
-// 通过获取 context 中的固定的key来生成 jwt token
-func (d *defaultJWT) GenerateDefaultJWT(c context.Context) (*JWTInfo, error) {
-	info := c.GetUserInfo()
-	return d.GenerateJWT(c, info)
-}
-
-func (d *defaultJWT) RefreshJWT(c context.Context) (*JWTInfo, error) {
-	j, exp, err := d.helper.Refresh(c.Context)
+func (d *defaultJWT) RefreshJWT(r *http.Request) (*JWTInfo, error) {
+	j, exp, err := d.helper.Refresh(r)
 	if err != nil {
 		return nil, err
 	}
@@ -75,10 +84,13 @@ func (d *defaultJWT) RefreshJWT(c context.Context) (*JWTInfo, error) {
 	}, nil
 }
 
-func (d *defaultJWT) GetJWT(c context.Context) (string, error) {
-	return d.helper.GetTokenString(c.Context)
+// GetJWT
+// 采用和 go-zero 框架的相同的存储和解析位置逻辑
+// 为从 header 的 Authorization 中获取 token 并解析
+func (d *defaultJWT) GetJWT(r *http.Request) (string, error) {
+	return request.AuthorizationHeaderExtractor.ExtractToken(r)
 }
 
-func (d *defaultJWT) CheckAndParseJWT(c context.Context) (map[string]any, error) {
-	return d.helper.CheckExpireAndParse(c.Context)
+func (d *defaultJWT) CheckAndParseJWT(r *http.Request) (map[string]any, error) {
+	return d.helper.CheckExpireAndParse(r)
 }
