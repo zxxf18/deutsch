@@ -10,19 +10,12 @@ import (
 
 	"deutsch/internal/logic/auth"
 	"deutsch/internal/svc"
-	"deutsch/internal/types"
 )
 
-func LoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func JWTRefreshHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.LoginRequest
-		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-			return
-		}
-
-		l := auth.NewLoginLogic(r.Context(), svcCtx)
-		resp, err := l.Login(&req)
+		l := auth.NewJWTRefreshLogic(r.Context(), svcCtx)
+		resp, err := l.JWTRefresh()
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

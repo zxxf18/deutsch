@@ -3,7 +3,7 @@ Host: 0.0.0.0
 Port: 8888
 
 JwtAuth:  # 内置 JWT 配置（对应 rest.JwtConf）
-  AccessSecret: Zx3C2DLKvxu87jD2SCl8LiLi/5Pjj82b0ewYp2r7rYs=  # HS256 密钥
+  AccessSecret: GkwA5O6g9zXjK2LmN4OpQ7RsT5UvW8Xy  # HS256 密钥
   AccessExpire: 3600  # 秒
 
 Mysql:

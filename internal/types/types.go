@@ -3,6 +3,17 @@
 
 package types
 
+type AuthResponse struct {
+	Base
+	Data struct {
+		UserId     int64  `json:"user_id"`
+		JWTToken   string `json:"jwt_token"`
+		Expires    int64  `json:"expires,default=3600"`
+		MaxRefresh int64  `json:"max_refresh,default=7200"`
+		Role       string `json:"role"` // 返回角色
+	} `json:"data"`
+}
+
 type Base struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
@@ -19,19 +30,17 @@ type GenerateInviteResponse struct {
 	} `json:"data"`
 }
 
+type JWTRefreshResponse struct {
+	AuthResponse
+}
+
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 type LoginResponse struct {
-	Base
-	Data struct {
-		UserId    string `json:"user_id"`
-		JWTToken  string `json:"jwt_token"`
-		ExpiresIn int64  `json:"expires_in,default=3600"`
-		Role      string `json:"role"` // 返回角色
-	} `json:"data"`
+	AuthResponse
 }
 
 type LogoutResponse struct {
@@ -47,9 +56,5 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	Base
-	Data struct {
-		UserId   int64  `json:"user_id"`
-		JWTToken string `json:"jwt_token"`
-	} `json:"data"`
+	AuthResponse
 }

@@ -17,9 +17,6 @@ const (
 	JWTKey        = "jwt"
 	JWTExpore     = "jwt_expire"
 	JWTTimeOrigin = "jwt_origin"
-	JWTAlgoRS256  = "RS256"
-	JWTAlgoRS512  = "RS512"
-	JWTAlgoRS384  = "RS384"
 )
 
 var (
@@ -72,7 +69,9 @@ type JWTHelper struct {
 	// - "cookie:<name>"
 	TokenLookup string
 
-	// signing algorithm - possible values are HS256, HS384, HS512, RS256, RS384 or RS512
+	// signing algorithm - possible values are
+	// HS256, HS384, HS512 (对称的，使用key作为密钥)
+	// RS256, RS384 or RS512 （非对称的，需要使用rsa证书）
 	// Optional, default is HS256.
 	SigningAlgorithm string
 	// Secret key used for signing. Required.
@@ -171,7 +170,7 @@ func (j *JWTHelper) publicKey() error {
 
 func (j *JWTHelper) usingPublicKeyAlgo() bool {
 	switch j.SigningAlgorithm {
-	case JWTAlgoRS256, JWTAlgoRS384, JWTAlgoRS512:
+	case jwt.SigningMethodRS256.Alg(), jwt.SigningMethodRS384.Alg(), jwt.SigningMethodRS512.Alg():
 		return true
 	}
 	return false
@@ -188,10 +187,11 @@ func (j *JWTHelper) Generate(claims map[string]any) (token string, expire time.T
 	for k, v := range claims {
 		data[k] = v
 	}
+
 	if j.usingPublicKeyAlgo() {
 		token, err = builder.SignedString(j.privKey)
 	} else {
-		token, err = builder.SignedString(j.Key)
+		token, err = builder.SignedString([]byte(j.Key))
 	}
 	return
 }

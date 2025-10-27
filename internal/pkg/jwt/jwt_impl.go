@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/golang-jwt/jwt/v4/request"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -26,13 +27,14 @@ type defaultJWT struct {
 
 func DefaultJWTConfig(secret string, expire int64) *JWTConfig {
 	return &JWTConfig{
-		Key:        secret,
-		Timeout:    time.Duration(expire) * time.Second,
-		MaxRefresh: time.Duration(expire*2) * time.Second,
+		Key:              secret,
+		Timeout:          time.Duration(expire) * time.Second,
+		MaxRefresh:       time.Duration(expire*2) * time.Second,
+		SigningAlgorithm: jwt.SigningMethodHS256.Alg(), // 默认采用对称的
 	}
 }
 
-func NewWithConfig(ctx context.Context, cfg JWTConfig) (any, error) {
+func NewWithConfig(ctx context.Context, cfg JWTConfig) (JWT, error) {
 	helper, err := NewJWTHelper(cfg)
 	if err != nil {
 		return nil, err
@@ -44,7 +46,7 @@ func NewWithConfig(ctx context.Context, cfg JWTConfig) (any, error) {
 	}, nil
 }
 
-func New(ctx context.Context, secret string, expire int64) (any, error) {
+func New(ctx context.Context, secret string, expire int64) (JWT, error) {
 	cfg := DefaultJWTConfig(secret, expire)
 	helper, err := NewJWTHelper(*cfg)
 	if err != nil {

@@ -10,6 +10,17 @@ info(
     version: "1.0"
 )
 
+type AuthResponse {
+    Base
+    Data {
+        UserId int64 `json:"user_id"`
+        JWTToken string `json:"jwt_token"`
+        Expires int64 `json:"expires_in,default=3600"`
+        MaxRefresh int64 `json:"expires_in,default=7200"`
+        Role string `json:"role"` // 返回角色
+    } `json:"data"`
+}
+
 type RegisterRequest {
     Phone string `json:"phone"`
     Password string `json:"password,min=8"`
@@ -19,11 +30,7 @@ type RegisterRequest {
 }
 
 type RegisterResponse {
-    Base
-    Data {
-        UserId int64 `json:"user_id"`
-        JWTToken string `json:"jwt_token"`
-    } `json:"data"`
+    AuthResponse
 }
 
 type LoginRequest {
@@ -32,17 +39,15 @@ type LoginRequest {
 }
 
 type LoginResponse {
-    Base
-    Data {
-        UserId string `json:"user_id"`
-        JWTToken string `json:"jwt_token"`
-        ExpiresIn int64 `json:"expires_in,default=3600"`
-        Role string `json:"role"` // 返回角色
-    } `json:"data"`
+    AuthResponse
 }
 
 type LogoutResponse {
     Base
+}
+
+type JWTRefreshResponse {
+    AuthResponse
 }
 
 type GenerateInviteRequest {
