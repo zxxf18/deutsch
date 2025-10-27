@@ -3,7 +3,6 @@ package gorm
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -11,19 +10,15 @@ import (
 
 // User GORM 用户模型
 type User struct {
-	ID          uint           `gorm:"primaryKey;autoIncrement" json:"id"`
-	UserId      string         `gorm:"type:varchar(36);uniqueIndex;not null" json:"user_id"` // UUID
-	Phone       string         `gorm:"type:varchar(20);uniqueIndex;not null" json:"phone"`
-	Password    string         `gorm:"type:varchar(64);not null" json:"-"` // SHA256
-	Username    string         `gorm:"type:varchar(50);uniqueIndex;not null" json:"username"`
-	Nickname    string         `gorm:"type:varchar(50)" json:"nickname"`
-	IsEnabled   bool           `gorm:"default:true" json:"is_enabled"`
-	Role        string         `gorm:"type:enum('admin','user');default:'user'" json:"role"`
-	Description string         `gorm:"type:text" json:"description"`
-	InviteCode  string         `gorm:"type:varchar(12)" json:"invite_code"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"` // 软删除
+	UserId      string `gorm:"type:varchar(36);uniqueIndex;not null" json:"user_id"` // UUID
+	Phone       string `gorm:"type:varchar(32);uniqueIndex;not null" json:"phone"`
+	Password    string `gorm:"type:varchar(64);not null" json:"-"` // SHA256
+	Username    string `gorm:"type:varchar(50);uniqueIndex;not null" json:"username"`
+	Nickname    string `gorm:"type:varchar(50)" json:"nickname"`
+	IsEnabled   bool   `gorm:"default:true" json:"is_enabled"`
+	Role        string `gorm:"type:enum('admin','user');default:'user'" json:"role"`
+	Description string `gorm:"type:text" json:"description"`
+	InviteCode  string `gorm:"type:varchar(32)" json:"invite_code"`
 
 	// 自定义方法
 	gorm.Model

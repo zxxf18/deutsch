@@ -10,13 +10,10 @@ import (
 
 // InviteCode GORM 邀请码模型
 type InviteCode struct {
-	ID        uint          `gorm:"primaryKey;autoIncrement" json:"id"`
-	Code      string        `gorm:"type:varchar(12);uniqueIndex;not null" json:"code"`
+	Code      string        `gorm:"type:varchar(32);uniqueIndex;not null" json:"code"`
 	CreatorId uint          `gorm:"not null" json:"creator_id"` // users.id
 	UsedBy    sql.NullInt64 `gorm:"-" json:"used_by"`           // users.id，可空
 	IsUsed    bool          `gorm:"default:false" json:"is_used"`
-	CreatedAt time.Time     `json:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at"`
 
 	gorm.Model
 }
