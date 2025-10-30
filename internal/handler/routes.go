@@ -8,6 +8,8 @@ import (
 	"time"
 
 	auth "deutsch/internal/handler/auth"
+	invitecode "deutsch/internal/handler/invitecode"
+	user "deutsch/internal/handler/user"
 	"deutsch/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -45,11 +47,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodPost,
-				Path:    "/invite/generate",
-				Handler: auth.GenerateInviteHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
 				Path:    "/jwt/refresh",
 				Handler: auth.JWTRefreshHandler(serverCtx),
 			},
@@ -61,6 +58,102 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/auth"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/validate/:id",
+				Handler: invitecode.ValidateHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/invitecode"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.AdminMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/:id",
+					Handler: invitecode.GetInviteCodeHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/:id",
+					Handler: invitecode.DeleteHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPatch,
+					Path:    "/:id/enable",
+					Handler: invitecode.EnableHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/generate",
+					Handler: invitecode.GenerateHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: invitecode.ListHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/invitecode"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/:id",
+					Handler: user.GetUserHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPatch,
+					Path:    "/profile",
+					Handler: user.UpdateUserHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/user"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.AdminMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodDelete,
+					Path:    "/:id",
+					Handler: user.DeleteUserHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPatch,
+					Path:    "/:id/enable",
+					Handler: user.EnableUserHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: user.ListUserHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/user"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)
 }

@@ -1,28 +1,27 @@
 // Code scaffolded by goctl. Safe to edit.
 // goctl 1.9.2
 
-package auth
+package invitecode
 
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
-
-	"deutsch/internal/logic/auth"
+	"deutsch/internal/logic/invitecode"
 	"deutsch/internal/svc"
 	"deutsch/internal/types"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GenerateHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.RegisterRequest
+		var req types.GenerateInviteCodeRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := auth.NewRegisterLogic(r.Context(), svcCtx)
-		resp, err := l.Register(&req)
+		l := invitecode.NewGenerateLogic(r.Context(), svcCtx)
+		resp, err := l.Generate(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

@@ -1,4 +1,4 @@
-package logic
+package code
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ const (
 	CodeUnauthorized       Code = 1011 // unauthorized or insufficient permissions
 	CodePasswordTooShort   Code = 1012 // password too short (minimum 8 characters)
 	CodePhoneInvalid       Code = 1013 // invalid phone format
-	CodeUsernameInvalid    Code = 1014 // invalid username format (3-50 characters)
+	CodeUsernameInvalid    Code = 1014 // invalid username format (6-50 characters)
 
 	// User Management (2000-2999)
 	CodeUserNotFound        Code = 2001 // user not found
@@ -99,7 +99,7 @@ var Messages = map[Code]string{
 	CodeUnauthorized:              "unauthorized or insufficient permissions",
 	CodePasswordTooShort:          "password too short (minimum 8 characters)",
 	CodePhoneInvalid:              "invalid phone format",
-	CodeUsernameInvalid:           "invalid username format (3-50 characters)",
+	CodeUsernameInvalid:           "invalid username format (6-50 characters)",
 	CodeUserNotFound:              "user not found",
 	CodeProfileUpdateFailed:       "failed to update user profile",
 	CodeNicknameTooLong:           "nickname too long (max 50 characters)",
@@ -154,8 +154,8 @@ func (c Code) Message() string {
 	return GetMessage(c)
 }
 
-func BaseSuccessResp() types.Base {
-	return types.Base{
+func BaseSuccessResp() *types.Base {
+	return &types.Base{
 		Code: int(CodeSuccess),
 		Msg:  CodeSuccess.Message(),
 	}

@@ -6,7 +6,7 @@ package auth
 import (
 	"context"
 
-	"deutsch/internal/logic"
+	"deutsch/internal/code"
 	"deutsch/internal/pkg/jwt"
 	"deutsch/internal/svc"
 	"deutsch/internal/types"
@@ -49,11 +49,11 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 		l.Errorf("failed to generate jwt: %+v", err)
 		return nil, err
 	}
-	resp.Base = logic.BaseSuccessResp()
+	resp.Base = *code.BaseSuccessResp()
 	resp.Data.Expires = jwtResp.Expire.UnixMilli()
 	resp.Data.MaxRefresh = jwtResp.MaxRefresh.UnixMilli()
 	resp.Data.JWTToken = jwtResp.Token
-	resp.Data.UserId = 1001
+	resp.Data.ID = "1001"
 	resp.Data.Role = "admin"
 	return
 }

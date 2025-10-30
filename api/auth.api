@@ -1,32 +1,32 @@
 syntax = "v1"
 
 import "base.api"
+import "user.api"
 
 info(
-    title: "User Authentication API"
-    desc: "Handles registration, login, logout for test prep users. Uses JWT for sessions."
+    title: "Authentication API"
+    desc: "Auth(JWT)相关"
     author: "zx"
     date: "2025-10-13 16:39:11"
     version: "1.0"
 )
 
+type JWT {
+    JWTToken string `json:"jwt_token"`
+    Expires int64 `json:"expires"`
+    MaxRefresh int64 `json:"max_refresh"`
+}
+
 type AuthResponse {
     Base
     Data {
-        UserId int64 `json:"user_id"`
-        JWTToken string `json:"jwt_token"`
-        Expires int64 `json:"expires_in,default=3600"`
-        MaxRefresh int64 `json:"expires_in,default=7200"`
-        Role string `json:"role"` // 返回角色
+        User
+        JWT
     } `json:"data"`
 }
 
 type RegisterRequest {
-    Phone string `json:"phone"`
-    Password string `json:"password,min=8"`
-    Username string `json:"username,min=3,max=50"`
-    Nickname string `json:"nickname,optional"`
-    InviteCode string `json:"invite_code"` // 必填邀请码
+    User
 }
 
 type RegisterResponse {
@@ -34,8 +34,7 @@ type RegisterResponse {
 }
 
 type LoginRequest {
-    Username string `json:"username"`
-    Password string `json:"password"`
+    User
 }
 
 type LoginResponse {
@@ -50,15 +49,5 @@ type JWTRefreshResponse {
     AuthResponse
 }
 
-type GenerateInviteRequest {
-    Count int32 `json:"count,optional,default=1"` // 生成邀请码数量
-}
-
-type GenerateInviteResponse {
-    Base
-    Data {
-        Codes []string `json:"codes"`
-    } `json:"data"`
-}
 
 

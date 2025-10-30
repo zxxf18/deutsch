@@ -1,0 +1,67 @@
+syntax = "v1"
+
+import "base.api"
+
+info(
+    title: "Invite Code API"
+    desc: "邀请码管理"
+    author: "zx"
+    date: "2025-10-13 16:39:11"
+    version: "1.0"
+)
+
+type InviteCode {
+    Id string `path:"id" json:"id"`
+    Code string `path:"code" json:"code"`
+    UsedBy string `path:"usedBy" json:"usedBy,omitempty"`
+    ExpiresAt int64 `path:"expiresAt" json:"expiresAt"`
+    CreatedBy string `path:"createdBy" json:"createdBy,omitempty"`
+    IsEnabled bool `path:"isEnabled" json:"is_enabled"`
+    CreatedAt int64 `path:"createdAt" json:"createdAt"`
+}
+
+type GetInviteCodeResponse {
+    Base
+    Data {
+        InviteCode
+    }`json:"data"`
+}
+
+type DeleteInviteCodeRequest {
+    ID string `path:"id" json:"id"`
+}
+
+type DeleteInviteCodeResponse {
+    Base
+}
+
+type EnableInviteCodeRequest {
+    ID string `path:"id" json:"id"`
+}
+
+type EnableInviteCodeResponse {
+    Base
+}
+
+type ListInviteCodeRequest {
+    Filter
+}
+
+type ListInviteCodeResponse {
+    Base
+    Data {
+        Filter
+        Items []InviteCode `path:"items" json:"items"`
+    }`json:"data"`
+}
+
+type GenerateInviteCodeRequest {
+    Count int `json:"count,optional,default=1"` // 生成邀请码数量
+}
+
+type GenerateInviteCodeResponse {
+    Base
+    Data {
+        Items []InviteCode `path:"items" json:"items"`
+    } `json:"data"`
+}

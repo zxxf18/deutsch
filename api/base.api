@@ -1,14 +1,33 @@
 syntax = "v1"
 
-info(
-    title: "API Base"
-    desc: "Base types"
-    author: "zx"
-    date: "2025-10-13 16:39:11"
-    version: "1.0"
+info (
+	title:   "API Base"
+	desc:    "Base types"
+	author:  "zx"
+	date:    "2025-10-13 16:39:11"
+	version: "1.0"
 )
 
 type Base {
-    Code int    `json:"code"`
-    Msg  string `json:"msg"`
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
 }
+
+type Filter {
+	PageNo   int `path:"pageNo,default=1" form:"pageNo,default=1" json:"pageNo" validate:"omitempty,gte=1"`
+	PageSize int `path:"pageSize,default=10" form:"pageNo,default=1" json:"pageSize" validate:"omitempty,gte=1,lte=100"`
+}
+
+// 通用响应
+type Response {
+	Base
+	Data interface{} `path:"data" json:"data"`
+}
+
+// 通用分页响应
+type ListResponse {
+	Data []interface{} `path:"data" json:"data"`
+	Filter
+	Total int64 `path:"total" json:"total"`
+}
+

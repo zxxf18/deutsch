@@ -6,11 +6,8 @@ package types
 type AuthResponse struct {
 	Base
 	Data struct {
-		UserId     int64  `json:"user_id"`
-		JWTToken   string `json:"jwt_token"`
-		Expires    int64  `json:"expires,default=3600"`
-		MaxRefresh int64  `json:"max_refresh,default=7200"`
-		Role       string `json:"role"` // 返回角色
+		User
+		JWT
 	} `json:"data"`
 }
 
@@ -19,24 +16,120 @@ type Base struct {
 	Msg  string `json:"msg"`
 }
 
-type GenerateInviteRequest struct {
-	Count int32 `json:"count,optional,default=1"` // 生成邀请码数量
+type DeleteInviteCodeRequest struct {
+	ID string `path:"id" json:"id"`
 }
 
-type GenerateInviteResponse struct {
+type DeleteInviteCodeResponse struct {
+	Base
+}
+
+type DeleteUserRequest struct {
+	ID string `path:"id" json:"id"`
+}
+
+type DeleteUserResponse struct {
+	Base
+}
+
+type EnableInviteCodeRequest struct {
+	ID string `path:"id" json:"id"`
+}
+
+type EnableInviteCodeResponse struct {
+	Base
+}
+
+type EnableUserRequest struct {
+	ID string `path:"id" json:"id"`
+}
+
+type EnableUserResponse struct {
+	Base
+}
+
+type Filter struct {
+	PageNo   int `path:"pageNo,default=1" form:"pageNo,default=1" json:"pageNo" validate:"omitempty,gte=1"`
+	PageSize int `path:"pageSize,default=10" form:"pageNo,default=1" json:"pageSize" validate:"omitempty,gte=1,lte=100"`
+}
+
+type GenerateInviteCodeRequest struct {
+	Count int `json:"count,optional,default=1"` // 生成邀请码数量
+}
+
+type GenerateInviteCodeResponse struct {
 	Base
 	Data struct {
-		Codes []string `json:"codes"`
+		Items []InviteCode `path:"items" json:"items"`
 	} `json:"data"`
+}
+
+type GetInviteCodeResponse struct {
+	Base
+	Data struct {
+		InviteCode
+	} `json:"data"`
+}
+
+type GetUserResponse struct {
+	Base
+	Data struct {
+		User
+	} `json:"data"`
+}
+
+type InviteCode struct {
+	Id        string `path:"id" json:"id"`
+	Code      string `path:"code" json:"code"`
+	UsedBy    string `path:"usedBy" json:"usedBy,omitempty"`
+	ExpiresAt int64  `path:"expiresAt" json:"expiresAt"`
+	CreatedBy string `path:"createdBy" json:"createdBy,omitempty"`
+	IsEnabled bool   `path:"isEnabled" json:"is_enabled"`
+	CreatedAt int64  `path:"createdAt" json:"createdAt"`
+}
+
+type JWT struct {
+	JWTToken   string `json:"jwt_token"`
+	Expires    int64  `json:"expires"`
+	MaxRefresh int64  `json:"max_refresh"`
 }
 
 type JWTRefreshResponse struct {
 	AuthResponse
 }
 
+type ListInviteCodeRequest struct {
+	Filter
+}
+
+type ListInviteCodeResponse struct {
+	Base
+	Data struct {
+		Filter
+		Items []InviteCode `path:"items" json:"items"`
+	} `json:"data"`
+}
+
+type ListResponse struct {
+	Data []interface{} `path:"data" json:"data"`
+	Filter
+	Total int64 `path:"total" json:"total"`
+}
+
+type ListUserRequest struct {
+	Filter
+}
+
+type ListUserResponse struct {
+	Base
+	Data struct {
+		Filter
+		Items []User `path:"items" json:"items"`
+	} `json:"data"`
+}
+
 type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	User
 }
 
 type LoginResponse struct {
@@ -48,13 +141,39 @@ type LogoutResponse struct {
 }
 
 type RegisterRequest struct {
-	Phone      string `json:"phone"`
-	Password   string `json:"password,min=8"`
-	Username   string `json:"username,min=3,max=50"`
-	Nickname   string `json:"nickname,optional"`
-	InviteCode string `json:"invite_code"` // 必填邀请码
+	User
 }
 
 type RegisterResponse struct {
 	AuthResponse
+}
+
+type Response struct {
+	Base
+	Data interface{} `path:"data" json:"data"`
+}
+
+type UpdateUserRequest struct {
+	User
+}
+
+type UpdateUserResponse struct {
+	Base
+	Data struct {
+		User
+	} `json:"data"`
+}
+
+type User struct {
+	ID          string `path:"id" json:"id"`
+	Username    string `path:"username" json:"username" validate:"required,alphanum,min=6,max=50"` // 字母数字, 6-50字符
+	Email       string `path:"email" json:"email,omitempty" validate:"omitempty,email"`
+	Phone       string `path:"phone" json:"phone,omitempty" validate:"omitempty,len=11,numeric"` // 11位数字
+	Role        string `path:"role" json:"role" validate:"omitempty,oneof=user admin guest"`
+	Nickname    string `path:"nickname" json:"nickname" validate:"omitempty,alphanumunicode,min=1,max=50"` // 字母数字+Unicode (支持中文), 1-50字符
+	IsEnabled   bool   `path:"isEnabled" json:"is_enabled"`
+	Description string `path:"description" json:"description" validate:"omitempty,max=500"`
+	InviteCode  string `path:"inviteCode" json:"invite_code" required,alphanum,min=4,max=32`
+	CreatedAt   int64  `path:"createdAt" json:"createdAt"`
+	UpdatedAt   int64  `path:"updatedAt" json:"updatedAt"`
 }

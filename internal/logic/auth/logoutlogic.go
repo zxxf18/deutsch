@@ -6,7 +6,7 @@ package auth
 import (
 	"context"
 
-	"deutsch/internal/logic"
+	"deutsch/internal/code"
 	"deutsch/internal/svc"
 	"deutsch/internal/types"
 
@@ -30,6 +30,6 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 func (l *LogoutLogic) Logout() (resp *types.LogoutResponse, err error) {
 	// todo 需要把 jwt 给作废掉
 	resp = &types.LogoutResponse{}
-	resp.Base = logic.BaseSuccessResp()
+	resp.Base = code.BaseSuccessResp()
 	return
 }

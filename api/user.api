@@ -1,0 +1,72 @@
+syntax = "v1"
+
+import "base.api"
+
+info(
+    title: "User API"
+    desc: "用户管理"
+    author: "zx"
+    date: "2025-10-13 16:39:11"
+    version: "1.0"
+)
+
+// UserItem 用户item（用于列表响应）
+type User {
+    ID string `path:"id" json:"id"`
+    Username    string `path:"username" json:"username" validate:"required,alphanum,min=6,max=50"` // 字母数字, 6-50字符
+    Email       string `path:"email" json:"email,omitempty" validate:"omitempty,email"`
+    Phone       string `path:"phone" json:"phone,omitempty" validate:"omitempty,len=11,numeric"` // 11位数字
+    Role        string `path:"role" json:"role" validate:"omitempty,oneof=user admin guest"`
+    Nickname    string `path:"nickname" json:"nickname" validate:"omitempty,alphanumunicode,min=1,max=50"` // 字母数字+Unicode (支持中文), 1-50字符
+    IsEnabled   bool   `path:"isEnabled" json:"is_enabled"`
+    Description string `path:"description" json:"description" validate:"omitempty,max=500"`
+    InviteCode  string `path:"inviteCode" json:"invite_code" required,alphanum,min=4,max=32`
+    CreatedAt   int64  `path:"createdAt" json:"createdAt"`
+    UpdatedAt   int64  `path:"updatedAt" json:"updatedAt"`
+}
+
+type GetUserResponse {
+    Base
+    Data {
+        User
+    } `json:"data"`
+}
+
+type UpdateUserRequest {
+    User
+}
+
+type UpdateUserResponse {
+    Base
+    Data {
+        User
+    } `json:"data"`
+}
+
+type DeleteUserRequest {
+    ID string `path:"id" json:"id"`
+}
+
+type DeleteUserResponse {
+    Base
+}
+
+type EnableUserRequest {
+    ID string `path:"id" json:"id"`
+}
+
+type EnableUserResponse {
+    Base
+}
+
+type ListUserRequest {
+    Filter
+}
+
+type ListUserResponse {
+    Base
+    Data {
+        Filter
+        Items []User `path:"items" json:"items"`
+    }`json:"data"`
+}
