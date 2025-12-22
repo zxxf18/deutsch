@@ -65,3 +65,39 @@ type GenerateInviteCodeResponse {
         Items []InviteCode `path:"items" json:"items"`
     } `json:"data"`
 }
+
+@server (
+	prefix:  /api/v1/invitecode
+	timeout: 3s
+	group:   invitecode
+	jwt:     JWTAuth
+)
+service Deutsch {
+	// 无auth: 验证
+	@handler ValidateHandler
+	get /validate/:id returns (Base)
+}
+
+@server (
+	prefix:     /api/v1/invitecode
+	timeout:    3s
+	group:      invitecode
+	jwt:        JWTAuth
+	middleware: JWTMiddleware,AdminMiddleware
+)
+service Deutsch {
+	@handler GenerateHandler
+	post /generate (GenerateInviteCodeRequest) returns (GenerateInviteCodeResponse)
+
+	@handler GetInviteCodeHandler
+	get /:id returns (GetInviteCodeResponse)
+
+	@handler ListHandler
+	get /list (ListInviteCodeRequest) returns (ListInviteCodeResponse)
+
+	@handler EnableHandler
+	patch /:id/enable (EnableInviteCodeRequest) returns (EnableInviteCodeResponse)
+
+	@handler DeleteHandler
+	delete /:id returns (DeleteInviteCodeResponse)
+}

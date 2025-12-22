@@ -12,7 +12,7 @@ info(
 
 // UserItem 用户item（用于列表响应）
 type User {
-    ID string `path:"id" json:"id"`
+    ID string `path:"id" json:"id,omitempty"`
     Username    string `path:"username" json:"username" validate:"required,alphanum,min=6,max=50"` // 字母数字, 6-50字符
     Email       string `path:"email" json:"email,omitempty" validate:"omitempty,email"`
     Phone       string `path:"phone" json:"phone,omitempty" validate:"omitempty,len=11,numeric"` // 11位数字
@@ -69,4 +69,37 @@ type ListUserResponse {
         Filter
         Items []User `path:"items" json:"items"`
     }`json:"data"`
+}
+
+@server (
+	prefix:     /api/v1/user
+	timeout:    3s
+	group:      user
+	jwt:        JWTAuth
+	middleware: JWTMiddleware
+)
+service Deutsch {
+	@handler GetUserHandler
+	get /:id returns (GetUserResponse)
+
+	@handler UpdateUserHandler
+	patch /profile (UpdateUserRequest) returns (UpdateUserResponse)
+}
+
+@server (
+	prefix:     /api/v1/user
+	timeout:    3s
+	group:      user
+	jwt:        JWTAuth
+	middleware: JWTMiddleware,AdminMiddleware
+)
+service Deutsch {
+	@handler ListUserHandler
+	get /list (Filter) returns (ListUserResponse)
+
+	@handler DeleteUserHandler
+	delete /:id returns (DeleteUserResponse)
+
+	@handler EnableUserHandler
+	patch /:id/enable (EnableUserRequest) returns (EnableUserResponse)
 }

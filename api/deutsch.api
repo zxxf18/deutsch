@@ -1,111 +1,12 @@
 syntax = "v1"
 
 import "base.api"
-
-service Deutsch {
-	@handler ping
-	get /ping
-}
-
 import "auth.api"
-
-@server (
-	prefix:  /api/v1/auth
-	timeout: 3s
-	group:   auth
-)
-service Deutsch {
-	@handler RegisterHandler
-	post /register (RegisterRequest) returns (RegisterResponse)
-
-	@handler LoginHandler
-	post /login (LoginRequest) returns (LoginResponse)
-}
-
-@server (
-	prefix:  /api/v1/auth
-	timeout: 3s
-	group:   auth
-	jwt:     JWTAuth
-)
-service Deutsch {
-	@handler LogoutHandler
-	post /logout returns (LogoutResponse)
-
-	@handler JWTRefreshHandler
-	post /jwt/refresh returns (JWTRefreshResponse)
-}
-
 import "user.api"
-
-@server (
-	prefix:     /api/v1/user
-	timeout:    3s
-	group:      user
-	jwt:        JWTAuth
-	middleware: JWTMiddleware
-)
-service Deutsch {
-	@handler GetUserHandler
-	get /:id returns (GetUserResponse)
-
-	@handler UpdateUserHandler
-	patch /profile (UpdateUserRequest) returns (UpdateUserResponse)
-}
-
-@server (
-	prefix:     /api/v1/user
-	timeout:    3s
-	group:      user
-	jwt:        JWTAuth
-	middleware: JWTMiddleware,AdminMiddleware
-)
-service Deutsch {
-	@handler ListUserHandler
-	get /list (Filter) returns (ListUserResponse)
-
-	@handler DeleteUserHandler
-	delete /:id returns (DeleteUserResponse)
-
-	@handler EnableUserHandler
-	patch /:id/enable (EnableUserRequest) returns (EnableUserResponse)
-}
-
 import "invitecode.api"
 
-@server (
-	prefix:  /api/v1/invitecode
-	timeout: 3s
-	group:   invitecode
-	jwt:     JWTAuth
-)
 service Deutsch {
-	// 无auth: 验证
-	@handler ValidateHandler
-	get /validate/:id returns (Base)
-}
-
-@server (
-	prefix:     /api/v1/invitecode
-	timeout:    3s
-	group:      invitecode
-	jwt:        JWTAuth
-	middleware: JWTMiddleware,AdminMiddleware
-)
-service Deutsch {
-	@handler GenerateHandler
-	post /generate (GenerateInviteCodeRequest) returns (GenerateInviteCodeResponse)
-
-	@handler GetInviteCodeHandler
-	get /:id returns (GetInviteCodeResponse)
-
-	@handler ListHandler
-	get /list (ListInviteCodeRequest) returns (ListInviteCodeResponse)
-
-	@handler EnableHandler
-	patch /:id/enable (EnableInviteCodeRequest) returns (EnableInviteCodeResponse)
-
-	@handler DeleteHandler
-	delete /:id returns (DeleteInviteCodeResponse)
+	@handler PingHandler
+	get /ping
 }
 
