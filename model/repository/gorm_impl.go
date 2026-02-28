@@ -29,6 +29,16 @@ func (r *UserGormRepo) GetByEmail(ctx context.Context, email string) (*gormdb.Us
 	return &user, err
 }
 
+func (r *UserGormRepo) GetByEmailIncludingDeleted(ctx context.Context, email string) (*gormdb.User, error) {
+	var user gormdb.User
+	err := r.DB.WithContext(ctx).Unscoped().Where("email = ?", email).First(&user).Error
+	return &user, err
+}
+
+func (r *UserGormRepo) Restore(ctx context.Context, user *gormdb.User) error {
+	return r.DB.WithContext(ctx).Unscoped().Model(user).Update("deleted_at", nil).Error
+}
+
 func (r *UserGormRepo) GetByPhone(ctx context.Context, phone string) (*gormdb.User, error) {
 	var user gormdb.User
 	err := r.DB.WithContext(ctx).Where("phone = ?", phone).First(&user).Error
@@ -43,6 +53,10 @@ func (r *UserGormRepo) GetByUserID(ctx context.Context, userID string) (*gormdb.
 
 func (r *UserGormRepo) Update(ctx context.Context, user *gormdb.User) error {
 	return r.DB.WithContext(ctx).Save(user).Error
+}
+
+func (r *UserGormRepo) Delete(ctx context.Context, user *gormdb.User) error {
+	return r.DB.WithContext(ctx).Delete(user).Error
 }
 
 func (r *UserGormRepo) List(ctx context.Context, filter *Filter) ([]*gormdb.User, int64, error) {
@@ -80,8 +94,8 @@ func NewInviteGormRepo(db *gorm.DB) InviteCodeRepository {
 	return &InviteGormRepo{DB: db}
 }
 
-func (r *InviteGormRepo) CreateBatch(ctx context.Context, count int, createdBy string) ([]string, error) {
-	codes := make([]string, 0, count)
+func (r *InviteGormRepo) CreateBatch(ctx context.Context, count int, createdBy string) ([]*gormdb.InviteCode, error) {
+	result := make([]*gormdb.InviteCode, 0, count)
 	tx := r.DB.WithContext(ctx).Begin()
 	defer func() {
 		if p := recover(); p != nil {
@@ -94,20 +108,20 @@ func (r *InviteGormRepo) CreateBatch(ctx context.Context, count int, createdBy s
 	}()
 
 	for i := 0; i < count; i++ {
-		ic := &gormdb.InviteCode{CreatedBy: createdBy} // BeforeCreate生成ID/Code/Expiries
+		ic := &gormdb.InviteCode{CreatedBy: createdBy, IsEnabled: true} // BeforeCreate生成ID/Code/Expiries
 		if err := tx.Create(ic).Error; err != nil {
 			tx.Rollback()
 			return nil, err
 		}
-		codes = append(codes, ic.Code)
+		result = append(result, ic)
 	}
-	return codes, nil
+	return result, nil
 }
 
 func (r *InviteGormRepo) Validate(ctx context.Context, code string) (bool, *time.Time, error) {
 	var ic gormdb.InviteCode
 	err := r.DB.WithContext(ctx).
-		Where("code = ? AND used_by IS NULL AND expires_at > NOW() AND is_enabled = true", code).
+		Where("code = ? AND (used_by IS NULL OR used_by = '') AND expires_at > NOW() AND is_enabled = true", code).
 		First(&ic).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil, nil
@@ -125,11 +139,16 @@ func (r *InviteGormRepo) MarkUsed(ctx context.Context, code string, usedBy strin
 		Update("used_by", usedBy).Error
 }
 
-func (r *InviteGormRepo) List(ctx context.Context, filter *Filter) ([]*gormdb.InviteCode, int64, error) {
+func (r *InviteGormRepo) List(ctx context.Context, filter *InviteCodeListFilter) ([]*gormdb.InviteCode, int64, error) {
 	var invites []*gormdb.InviteCode
 	var total int64
 
 	query := r.DB.WithContext(ctx).Model(&gormdb.InviteCode{})
+
+	// 仅查看可用的邀请码：未使用、未过期、已启用
+	if filter != nil && filter.AvailableOnly {
+		query = query.Where("(used_by IS NULL OR used_by = '') AND expires_at > NOW() AND is_enabled = true")
+	}
 
 	// 分页计算
 	pageNo := 1
@@ -177,8 +196,22 @@ func (r *InviteGormRepo) ListByCreator(ctx context.Context, createdBy string, fi
 	return invites, total, nil
 }
 
+func (r *InviteGormRepo) GetByID(ctx context.Context, id string) (*gormdb.InviteCode, error) {
+	var ic gormdb.InviteCode
+	err := r.DB.WithContext(ctx).First(&ic, "id = ?", id).Error
+	return &ic, err
+}
+
 func (r *InviteGormRepo) GetByCode(ctx context.Context, code string) (*gormdb.InviteCode, error) {
 	var ic gormdb.InviteCode
 	err := r.DB.WithContext(ctx).Where("code = ?", code).First(&ic).Error
 	return &ic, err
+}
+
+func (r *InviteGormRepo) Update(ctx context.Context, ic *gormdb.InviteCode) error {
+	return r.DB.WithContext(ctx).Save(ic).Error
+}
+
+func (r *InviteGormRepo) Delete(ctx context.Context, ic *gormdb.InviteCode) error {
+	return r.DB.WithContext(ctx).Delete(ic).Error
 }

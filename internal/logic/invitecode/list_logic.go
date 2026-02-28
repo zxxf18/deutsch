@@ -3,8 +3,10 @@ package invitecode
 import (
 	"context"
 
+	"deutsch/internal/code"
 	"deutsch/internal/svc"
 	"deutsch/internal/types"
+	"deutsch/model/repository"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +26,38 @@ func NewListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListLogic {
 }
 
 func (l *ListLogic) List(req *types.ListInviteCodeRequest) (resp *types.ListInviteCodeResponse, err error) {
-	// todo: add your logic here and delete this line
+	resp = &types.ListInviteCodeResponse{}
 
-	return
+	filter := &repository.InviteCodeListFilter{
+		Filter: repository.Filter{
+			PageNo:   req.PageNo,
+			PageSize: req.PageSize,
+		},
+		AvailableOnly: req.AvailableOnly,
+	}
+	if filter.PageNo <= 0 {
+		filter.PageNo = 1
+	}
+	if filter.PageSize <= 0 {
+		filter.PageSize = 10
+	}
+	if filter.PageSize > 100 {
+		filter.PageSize = 100
+	}
+
+	invites, total, err := l.svcCtx.InviteCodeRepo.List(l.ctx, filter)
+	if err != nil {
+		l.Errorf("failed to list invite codes: %+v", err)
+		return nil, code.NewCodeError(code.CodeDatabaseError)
+	}
+
+	resp.Base = *code.BaseSuccessResp()
+	resp.Data.PageNo = filter.PageNo
+	resp.Data.PageSize = filter.PageSize
+	resp.Data.Total = total
+	resp.Data.Items = make([]types.InviteCode, 0, len(invites))
+	for _, ic := range invites {
+		resp.Data.Items = append(resp.Data.Items, toTypesInviteCode(ic))
+	}
+	return resp, nil
 }

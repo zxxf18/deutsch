@@ -3,10 +3,12 @@ package invitecode
 import (
 	"context"
 
+	"deutsch/internal/code"
 	"deutsch/internal/svc"
 	"deutsch/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"gorm.io/gorm"
 )
 
 type GetInviteCodeLogic struct {
@@ -23,8 +25,19 @@ func NewGetInviteCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 	}
 }
 
-func (l *GetInviteCodeLogic) GetInviteCode() (resp *types.GetInviteCodeResponse, err error) {
-	// todo: add your logic here and delete this line
+func (l *GetInviteCodeLogic) GetInviteCode(req *types.GetInviteCodeRequest) (resp *types.GetInviteCodeResponse, err error) {
+	resp = &types.GetInviteCodeResponse{}
 
-	return
+	ic, err := getInviteByIDOrCode(l.ctx, l.svcCtx.InviteCodeRepo, req.ID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, code.NewCodeError(code.CodeInviteNotFound)
+		}
+		l.Errorf("failed to get invite code: %+v", err)
+		return nil, code.NewCodeError(code.CodeDatabaseError)
+	}
+
+	resp.Base = *code.BaseSuccessResp()
+	resp.Data = struct{ types.InviteCode }{InviteCode: toTypesInviteCode(ic)}
+	return resp, nil
 }

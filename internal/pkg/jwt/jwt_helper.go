@@ -3,6 +3,7 @@ package jwt
 import (
 	"context"
 	"crypto/rsa"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -212,6 +213,39 @@ func (j *JWTHelper) CheckMaxRefreshAndParse(r *http.Request) (map[string]any, er
 	return j.checkAndParse(r, j.MaxRefresh)
 }
 
+// parseInt64 兼容 float64 和 json.Number，避免 interface conversion panic
+func parseInt64(v any) (int64, error) {
+	if v == nil {
+		return 0, ErrInvalidToken
+	}
+	switch val := v.(type) {
+	case float64:
+		return int64(val), nil
+	case json.Number:
+		n, err := val.Int64()
+		if err != nil {
+			return 0, ErrInvalidToken
+		}
+		return n, nil
+	default:
+		return 0, ErrInvalidToken
+	}
+}
+
+// GetExpireFromToken 从 token 字符串解析出过期时间戳（秒），用于黑名单 TTL
+func GetExpireFromToken(tokenString string) (int64, error) {
+	parser := jwt.NewParser()
+	token, _, err := parser.ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		return 0, err
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, ErrInvalidToken
+	}
+	return parseInt64(claims[JWTExpore])
+}
+
 func (j *JWTHelper) checkAndParse(r *http.Request, offset time.Duration) (map[string]any, error) {
 	jtoken, err := j.parser.ParseToken(r, j.Key, "")
 	if err != nil {
@@ -225,7 +259,10 @@ func (j *JWTHelper) checkAndParse(r *http.Request, offset time.Duration) (map[st
 	}
 
 	claims := jtoken.Claims.(jwt.MapClaims)
-	exp := int64(claims[JWTExpore].(float64))
+	exp, err := parseInt64(claims[JWTExpore])
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
 	if exp < time.Now().Add(-offset).Unix() {
 		return nil, ErrExpiredToken
 	}

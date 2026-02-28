@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"deutsch/internal/code"
+	"deutsch/internal/pkg/jwt"
 	"deutsch/internal/svc"
 	"deutsch/internal/types"
 
@@ -24,9 +25,21 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 	}
 }
 
-func (l *LogoutLogic) Logout() (resp *types.LogoutResponse, err error) {
-	// todo 需要把 jwt 给作废掉
+func (l *LogoutLogic) Logout(tokenString string) (resp *types.LogoutResponse, err error) {
 	resp = &types.LogoutResponse{}
 	resp.Base = *code.BaseSuccessResp()
-	return
+
+	if tokenString == "" {
+		return resp, nil
+	}
+	expireAt, err := jwt.GetExpireFromToken(tokenString)
+	if err != nil {
+		l.Infof("logout: failed to parse token expire: %v", err)
+		return resp, nil
+	}
+	if err := l.svcCtx.TokenBlacklist.AddWithExpire(tokenString, expireAt); err != nil {
+		l.Errorf("logout: failed to add token to blacklist: %v", err)
+		// 不影响响应，客户端可丢弃 token
+	}
+	return resp, nil
 }

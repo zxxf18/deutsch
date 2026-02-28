@@ -3,6 +3,7 @@ package invitecode
 import (
 	"context"
 
+	"deutsch/internal/code"
 	"deutsch/internal/svc"
 	"deutsch/internal/types"
 
@@ -23,8 +24,19 @@ func NewValidateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Validate
 	}
 }
 
-func (l *ValidateLogic) Validate() (resp *types.Base, err error) {
-	// todo: add your logic here and delete this line
-
-	return
+func (l *ValidateLogic) Validate(inviteCode string) (resp *types.Base, err error) {
+	resp = &types.Base{}
+	if inviteCode == "" {
+		return nil, code.NewCodeError(code.CodeInvalidInviteCode)
+	}
+	valid, _, err := l.svcCtx.InviteCodeRepo.Validate(l.ctx, inviteCode)
+	if err != nil {
+		l.Errorf("failed to validate invite code: %+v", err)
+		return nil, code.NewCodeError(code.CodeDatabaseError)
+	}
+	if !valid {
+		return nil, code.NewCodeError(code.CodeInvalidInviteCode)
+	}
+	*resp = *code.BaseSuccessResp()
+	return resp, nil
 }

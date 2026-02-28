@@ -3,11 +3,14 @@ package gormdb
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+var sha256HexRegex = regexp.MustCompile(`^[a-fA-F0-9]{64}$`)
 
 type UserRole string
 
@@ -22,7 +25,7 @@ type User struct {
 	ID           string         `gorm:"primaryKey;type:char(36);not null" json:"id"` // UUID string
 	Username     string         `gorm:"uniqueIndex;type:varchar(50);not null" json:"username"`
 	Email        string         `gorm:"uniqueIndex;type:varchar(100);not null" json:"email"`
-	Phone        string         `gorm:"uniqueIndex;type:varchar(20)" json:"phone,omitempty"` // 支持GetByPhone
+	Phone        *string        `gorm:"uniqueIndex;type:varchar(20)" json:"phone,omitempty"` // 支持GetByPhone，空则NULL避免唯一索引冲突
 	PasswordHash string         `gorm:"type:varchar(255);not null" json:"-"`                 // 隐藏密码
 	Role         string         `gorm:"type:enum('user','admin','guest');default:user" json:"role"`
 	Nickname     string         `gorm:"type:varchar(50)" json:"nickname"`
@@ -42,9 +45,9 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// BeforeSave 使用SHA256哈希密码
+// BeforeSave 使用SHA256哈希密码（仅当尚未哈希时，避免重复哈希）
 func (u *User) BeforeSave(tx *gorm.DB) error {
-	if u.PasswordHash != "" {
+	if u.PasswordHash != "" && !sha256HexRegex.MatchString(u.PasswordHash) {
 		hash := sha256.Sum256([]byte(u.PasswordHash))
 		u.PasswordHash = hex.EncodeToString(hash[:])
 	}

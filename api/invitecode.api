@@ -20,11 +20,15 @@ type InviteCode {
     CreatedAt int64 `path:"createdAt" json:"createdAt"`
 }
 
+type GetInviteCodeRequest {
+    ID string `path:"id" json:"id"`
+}
+
 type GetInviteCodeResponse {
     Base
     Data {
         InviteCode
-    }`json:"data"`
+    } `json:"data"`
 }
 
 type DeleteInviteCodeRequest {
@@ -36,7 +40,8 @@ type DeleteInviteCodeResponse {
 }
 
 type EnableInviteCodeRequest {
-    ID string `path:"id" json:"id"`
+    ID        string `path:"id" json:"id"`
+    IsEnabled bool   `json:"is_enabled"`
 }
 
 type EnableInviteCodeResponse {
@@ -45,14 +50,16 @@ type EnableInviteCodeResponse {
 
 type ListInviteCodeRequest {
     Filter
+    AvailableOnly bool `form:"availableOnly,optional"` // 仅查看可用的邀请码（未使用、未过期、已启用）
 }
 
 type ListInviteCodeResponse {
     Base
     Data {
         Filter
+        Total int64  `json:"total"`
         Items []InviteCode `path:"items" json:"items"`
-    }`json:"data"`
+    } `json:"data"`
 }
 
 type GenerateInviteCodeRequest {

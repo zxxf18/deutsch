@@ -10,19 +10,24 @@ info(
     version: "1.0"
 )
 
-// UserItem 用户item（用于列表响应）
+// User 用户
 type User {
-    ID string `path:"id" json:"id,omitempty"`
-    Username    string `path:"username" json:"username" validate:"required,alphanum,min=6,max=50"` // 字母数字, 6-50字符
+    ID          string `path:"id" json:"id,omitempty"`
+    Username    string `path:"username" json:"username,omitempty" validate:"omitempty,alphanum,min=6,max=50"`
     Email       string `path:"email" json:"email,omitempty" validate:"omitempty,email"`
-    Phone       string `path:"phone" json:"phone,omitempty" validate:"omitempty,len=11,numeric"` // 11位数字
-    Role        string `path:"role" json:"role" validate:"omitempty,oneof=user admin guest"`
-    Nickname    string `path:"nickname" json:"nickname" validate:"omitempty,alphanumunicode,min=1,max=50"` // 字母数字+Unicode (支持中文), 1-50字符
-    IsEnabled   bool   `path:"isEnabled" json:"is_enabled"`
-    Description string `path:"description" json:"description" validate:"omitempty,max=500"`
-    InviteCode  string `path:"inviteCode" json:"invite_code" required,alphanum,min=4,max=32`
-    CreatedAt   int64  `path:"createdAt" json:"createdAt"`
-    UpdatedAt   int64  `path:"updatedAt" json:"updatedAt"`
+    Password    string `path:"password" json:"password,omitempty"` // 仅登录/注册使用
+    Phone       string `path:"phone" json:"phone,omitempty" validate:"omitempty,len=11,numeric"`
+    Role        string `path:"role" json:"role,omitempty" validate:"omitempty,oneof=user admin guest"`
+    Nickname    string `path:"nickname" json:"nickname,omitempty" validate:"omitempty,max=50"`
+    IsEnabled   bool   `path:"isEnabled" json:"is_enabled,omitempty"`
+    Description string `path:"description" json:"description,omitempty" validate:"omitempty,max=500"`
+    InviteCode  string `path:"inviteCode" json:"invite_code,omitempty" validate:"omitempty,alphanum,min=4,max=32"`
+    CreatedAt   int64  `path:"createdAt" json:"createdAt,omitempty"`
+    UpdatedAt   int64  `path:"updatedAt" json:"updatedAt,omitempty"`
+}
+
+type GetUserRequest {
+    ID string `path:"id"`
 }
 
 type GetUserResponse {
@@ -32,8 +37,10 @@ type GetUserResponse {
     } `json:"data"`
 }
 
+// UpdateUserRequest 更新个人资料（不嵌入 User，避免 path:"id" 解析错误）
 type UpdateUserRequest {
-    User
+    Nickname    string `json:"nickname,optional" validate:"omitempty,max=50"`
+    Description string `json:"description,optional" validate:"omitempty,max=500"`
 }
 
 type UpdateUserResponse {
@@ -52,7 +59,8 @@ type DeleteUserResponse {
 }
 
 type EnableUserRequest {
-    ID string `path:"id" json:"id"`
+    ID        string `path:"id" json:"id"`
+    IsEnabled bool   `json:"is_enabled"`
 }
 
 type EnableUserResponse {
@@ -67,8 +75,9 @@ type ListUserResponse {
     Base
     Data {
         Filter
+        Total int64  `json:"total"`
         Items []User `path:"items" json:"items"`
-    }`json:"data"`
+    } `json:"data"`
 }
 
 @server (
@@ -80,7 +89,7 @@ type ListUserResponse {
 )
 service Deutsch {
 	@handler GetUserHandler
-	get /:id returns (GetUserResponse)
+	get /:id (GetUserRequest) returns (GetUserResponse)
 
 	@handler UpdateUserHandler
 	patch /profile (UpdateUserRequest) returns (UpdateUserResponse)
@@ -98,7 +107,7 @@ service Deutsch {
 	get /list (Filter) returns (ListUserResponse)
 
 	@handler DeleteUserHandler
-	delete /:id returns (DeleteUserResponse)
+	delete /:id (DeleteUserRequest) returns (DeleteUserResponse)
 
 	@handler EnableUserHandler
 	patch /:id/enable (EnableUserRequest) returns (EnableUserResponse)

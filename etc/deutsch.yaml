@@ -1,10 +1,15 @@
-Name: Deutsch
+Name: deutsch
 Host: 0.0.0.0
 Port: 8888
 
-JwtAuth:  # 内置 JWT 配置（对应 rest.JwtConf）
-  AccessSecret: GkwA5O6g9zXjK2LmN4OpQ7RsT5UvW8Xy  # HS256 密钥
-  AccessExpire: 3600  # 秒
+JWTAuth:
+  AccessSecret: "GkwA5O6g9zXjK2LmN4OpQ7RsT5UvW8Xy"
+  AccessExpire: 7200  # 2小时，单位秒
 
-Mysql:
-  DataSource: root:12345678@tcp(localhost:3306)/deutsch?charset=utf8mb4
+MySQL:
+  DataSource: "root:12345678@tcp(127.0.0.1:3306)/deutsch?charset=utf8mb4&parseTime=True"
+
+Redis:
+  Host: "localhost:6379"
+  Type: "node"
+  Pass: ""

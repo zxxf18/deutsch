@@ -25,16 +25,25 @@ type AuthResponse {
     } `json:"data"`
 }
 
+// LoginRequest 登录请求（不嵌入 User，避免 path:"id" 解析错误）
+type LoginRequest {
+    Email    string `json:"email,optional"`
+    Phone    string `json:"phone,optional"`
+    Password string `json:"password"`
+}
+
+// RegisterRequest 注册请求
 type RegisterRequest {
-    User
+    Email      string `json:"email"`
+    Password   string `json:"password"`
+    InviteCode string `json:"invite_code"`
+    Username   string `json:"username,optional"`
+    Nickname   string `json:"nickname,optional"`
+    Phone      string `json:"phone,optional"`
 }
 
 type RegisterResponse {
     AuthResponse
-}
-
-type LoginRequest {
-    User
 }
 
 type LoginResponse {

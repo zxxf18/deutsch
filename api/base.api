@@ -13,9 +13,10 @@ type Base {
 	Msg  string `json:"msg"`
 }
 
+// Filter 分页参数，从 query 解析（GET ?pageNo=1&pageSize=10），不使用 path 避免解析错误
 type Filter {
-	PageNo   int `path:"pageNo,default=1" form:"pageNo,default=1" json:"pageNo" validate:"omitempty,gte=1"`
-	PageSize int `path:"pageSize,default=10" form:"pageNo,default=1" json:"pageSize" validate:"omitempty,gte=1,lte=100"`
+	PageNo   int `form:"pageNo,optional,default=1" json:"pageNo" validate:"omitempty,gte=1"`
+	PageSize int `form:"pageSize,optional,default=10" json:"pageSize" validate:"omitempty,gte=1,lte=100"`
 }
 
 // 通用响应

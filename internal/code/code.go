@@ -20,6 +20,7 @@ const (
 	CodeInviteCodeRequired Code = 1002 // invite code required
 	CodePhoneExists        Code = 1003 // phone already exists
 	CodeUsernameExists     Code = 1004 // username already exists
+	CodeEmailExists        Code = 1015 // email already exists
 	CodeInvalidCredentials Code = 1005 // invalid credentials (phone/password error)
 	CodeUserDisabled       Code = 1006 // user disabled
 	CodeInvalidToken       Code = 1007 // invalid or expired token
@@ -42,6 +43,7 @@ const (
 	CodeInviteGenerationFailed Code = 2101 // failed to generate invite codes
 	CodeInviteCountExceeded    Code = 2102 // invite count exceeded
 	CodeInviteNotFound         Code = 2103 // invite code not found
+	CodeInviteCodeAlreadyUsed  Code = 2104 // invite code already used, cannot modify
 
 	// Question Bank (3000-3999)
 	CodeQuestionNotFound   Code = 3001 // question not found
@@ -90,6 +92,7 @@ var Messages = map[Code]string{
 	CodeInviteCodeRequired:        "invite code required",
 	CodePhoneExists:               "phone already exists",
 	CodeUsernameExists:            "username already exists",
+	CodeEmailExists:               "email already exists",
 	CodeInvalidCredentials:        "invalid credentials (phone/password error)",
 	CodeUserDisabled:              "user disabled",
 	CodeInvalidToken:              "invalid or expired token",
@@ -108,6 +111,7 @@ var Messages = map[Code]string{
 	CodeInviteGenerationFailed:    "failed to generate invite codes",
 	CodeInviteCountExceeded:       "invite count exceeded",
 	CodeInviteNotFound:            "invite code not found",
+	CodeInviteCodeAlreadyUsed:     "invite code already used, cannot modify",
 	CodeQuestionNotFound:          "question not found",
 	CodeCategoryInvalid:           "invalid category (e.g., history, law)",
 	CodeDifficultyInvalid:         "invalid difficulty (easy/medium/hard)",
@@ -159,4 +163,25 @@ func BaseSuccessResp() *types.Base {
 		Code: int(CodeSuccess),
 		Msg:  CodeSuccess.Message(),
 	}
+}
+
+// CodeError 用于业务错误，携带 code 和 msg
+type CodeError struct {
+	Code Code
+	Msg  string
+}
+
+func (e *CodeError) Error() string {
+	if e.Msg != "" {
+		return e.Msg
+	}
+	return e.Code.Message()
+}
+
+func NewCodeError(c Code) *CodeError {
+	return &CodeError{Code: c, Msg: c.Message()}
+}
+
+func NewCodeErrorWithMsg(c Code, msg string) *CodeError {
+	return &CodeError{Code: c, Msg: msg}
 }

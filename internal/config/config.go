@@ -3,7 +3,10 @@
 
 package config
 
-import "github.com/zeromicro/go-zero/rest"
+import (
+	"github.com/zeromicro/go-zero/core/stores/redis"
+	"github.com/zeromicro/go-zero/rest"
+)
 
 type Config struct {
 	rest.RestConf
@@ -11,4 +14,8 @@ type Config struct {
 		AccessSecret string
 		AccessExpire int64 // 单位是s
 	}
+	MySQL struct {
+		DataSource string // DSN: user:pass@tcp(host:port)/dbname?charset=utf8mb4&parseTime=True
+	}
+	Redis redis.RedisConf
 }

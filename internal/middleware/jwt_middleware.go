@@ -2,17 +2,19 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"deutsch/internal/code"
+	"deutsch/internal/common"
 	"deutsch/internal/config"
 	"deutsch/internal/pkg/jwt"
 	"deutsch/internal/types"
 )
+
+const jwtKey = "jwt"
 
 type JWTMiddleware struct {
 	cfg config.Config
@@ -43,8 +45,15 @@ func (m *JWTMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			})
 			return
 		}
-		// todo
-		fmt.Println(data)
+		jwtData, _ := data[jwtKey].(map[string]any)
+		if jwtData != nil {
+			if userID, ok := jwtData["userID"].(string); ok {
+				r = r.WithContext(common.WithUserID(r.Context(), userID))
+			}
+			if role, ok := jwtData["role"].(string); ok {
+				r = r.WithContext(common.WithRole(r.Context(), role))
+			}
+		}
 		next(w, r)
 	}
 }

@@ -16,3 +16,4 @@ unittest.txt
 /**/*.log
 .gocoverc
 cover.html
+docs/

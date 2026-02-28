@@ -1,18 +1,34 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
 
-type AdminMiddleware struct{}
+	"github.com/zeromicro/go-zero/rest/httpx"
 
-func NewAdminMiddleware() *AdminMiddleware {
-	return &AdminMiddleware{}
+	"deutsch/internal/code"
+	"deutsch/internal/common"
+	"deutsch/internal/config"
+	"deutsch/internal/types"
+)
+
+type AdminMiddleware struct {
+	cfg config.Config
+}
+
+func NewAdminMiddleware(c config.Config) *AdminMiddleware {
+	return &AdminMiddleware{cfg: c}
 }
 
 func (m *AdminMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO generate middleware implement function, delete after code implementation
-
-		// Passthrough to next handler if need
+		role := common.GetRole(r.Context())
+		if role != "admin" {
+			httpx.WriteJson(w, http.StatusForbidden, &types.Base{
+				Code: int(code.CodeAdminRequired),
+				Msg:  code.CodeAdminRequired.Message(),
+			})
+			return
+		}
 		next(w, r)
 	}
 }
