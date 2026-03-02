@@ -8,6 +8,7 @@ import (
 	"time"
 
 	auth "deutsch/internal/handler/auth"
+	config "deutsch/internal/handler/config"
 	invitecode "deutsch/internal/handler/invitecode"
 	user "deutsch/internal/handler/user"
 	"deutsch/internal/svc"
@@ -58,6 +59,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		},
 		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/auth"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/config",
+				Handler: config.ConfigHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/states",
+				Handler: config.StatesHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)
 

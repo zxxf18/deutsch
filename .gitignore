@@ -17,3 +17,4 @@ unittest.txt
 .gocoverc
 cover.html
 docs/
+.cursor

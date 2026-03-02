@@ -4,6 +4,7 @@ import "base.api"
 import "auth.api"
 import "user.api"
 import "invitecode.api"
+import "config.api"
 
 service Deutsch {
 	@handler PingHandler

@@ -23,6 +23,7 @@ type ServiceContext struct {
 	AdminMiddleware     rest.Middleware
 	UserRepo            repository.UserRepository
 	InviteCodeRepo      repository.InviteCodeRepository
+	ConfigRepo          repository.ConfigRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -38,5 +39,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		AdminMiddleware:     middleware.NewAdminMiddleware(c).Handle,
 		UserRepo:            repository.NewUserGormRepo(gormdb.DB),
 		InviteCodeRepo:      repository.NewInviteGormRepo(gormdb.DB),
+		ConfigRepo:          repository.NewConfigGormRepo(gormdb.DB),
 	}
 }

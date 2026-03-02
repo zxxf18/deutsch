@@ -3,6 +3,14 @@
 
 package types
 
+type AppConfigData struct {
+	TotalQuestions int                `json:"totalQuestions"`
+	ExamQuestions  int                `json:"examQuestions"`
+	ExamMinutes    int                `json:"examMinutes"`
+	PassScore      int                `json:"passScore"`
+	LanguageModes  []LanguageModeItem `json:"languageModes"`
+}
+
 type AuthResponse struct {
 	Base
 	Data struct {
@@ -66,6 +74,11 @@ type GenerateInviteCodeResponse struct {
 	} `json:"data"`
 }
 
+type GetConfigResponse struct {
+	Base
+	Data AppConfigData `json:"data"`
+}
+
 type GetInviteCodeRequest struct {
 	ID string `path:"id" json:"id"`
 }
@@ -108,6 +121,11 @@ type JwtRefreshResponse struct {
 	AuthResponse
 }
 
+type LanguageModeItem struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+}
+
 type ListInviteCodeRequest struct {
 	Filter
 	AvailableOnly bool `form:"availableOnly,optional"` // 仅查看可用的邀请码（未使用、未过期、已启用）
@@ -126,6 +144,14 @@ type ListResponse struct {
 	Data []any `path:"data" json:"data"`
 	Filter
 	Total int64 `path:"total" json:"total"`
+}
+
+type ListStatesResponse struct {
+	Base
+	Data struct {
+		Total int64       `json:"total"`
+		Items []StateItem `json:"items"`
+	} `json:"data"`
 }
 
 type ListUserRequest struct {
@@ -171,6 +197,13 @@ type RegisterResponse struct {
 type Response struct {
 	Base
 	Data any `path:"data" json:"data"`
+}
+
+type StateItem struct {
+	Id     string `json:"id"`
+	Slug   string `json:"slug"`
+	Name   string `json:"name"`
+	NameCn string `json:"nameCn"`
 }
 
 type UpdateUserRequest struct {

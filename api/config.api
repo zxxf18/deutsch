@@ -1,0 +1,57 @@
+syntax = "v1"
+
+import "base.api"
+
+info(
+    title: "Config API"
+    desc: "配置与元数据"
+    author: "zx"
+    date: "2025-10-13 16:39:11"
+    version: "1.0"
+)
+
+type StateItem {
+    Id     string `json:"id"`
+    Slug   string `json:"slug"`
+    Name   string `json:"name"`
+    NameCn string `json:"nameCn"`
+}
+
+type ListStatesResponse {
+    Base
+    Data {
+        Total int64       `json:"total"`
+        Items []StateItem `json:"items"`
+    } `json:"data"`
+}
+
+type LanguageModeItem {
+    Value string `json:"value"`
+    Label string `json:"label"`
+}
+
+type AppConfigData {
+    TotalQuestions int                `json:"totalQuestions"`
+    ExamQuestions  int                `json:"examQuestions"`
+    ExamMinutes    int                `json:"examMinutes"`
+    PassScore      int                `json:"passScore"`
+    LanguageModes  []LanguageModeItem `json:"languageModes"`
+}
+
+type GetConfigResponse {
+    Base
+    Data AppConfigData `json:"data"`
+}
+
+@server (
+	prefix:  /api/v1
+	timeout: 3s
+	group:  config
+)
+service Deutsch {
+	@handler StatesHandler
+	get /states returns (ListStatesResponse)
+
+	@handler ConfigHandler
+	get /config returns (GetConfigResponse)
+}

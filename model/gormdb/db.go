@@ -34,6 +34,7 @@ func InitDB(dsn string) error {
 	if err := AutoMigrate(); err != nil {
 		return err
 	}
+	// 初始化数据请执行 scripts/schema/init_data.sql
 
 	return nil
 }
@@ -62,5 +63,6 @@ func AutoMigrate() error {
 	return DB.AutoMigrate(
 		&User{},
 		&InviteCode{},
+		&GermanState{},
 	)
 }
