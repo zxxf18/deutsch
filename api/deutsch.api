@@ -6,6 +6,7 @@ import "user.api"
 import "invitecode.api"
 import "config.api"
 import "question.api"
+import "progress.api"
 
 service Deutsch {
 	@handler PingHandler

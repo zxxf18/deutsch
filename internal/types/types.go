@@ -3,6 +3,14 @@
 
 package types
 
+type AddWrongQuestionRequest struct {
+	QuestionId string `json:"questionId"`
+}
+
+type AddWrongQuestionResponse struct {
+	Base
+}
+
 type AllQuestionsByStateResponse struct {
 	Base
 	Data map[string][]QuestionItem `json:"data"`
@@ -63,6 +71,25 @@ type EnableUserResponse struct {
 	Base
 }
 
+type ExamRecordDetailItem struct {
+	QuestionId         string `json:"questionId"`
+	ChosenAnswer       int    `json:"chosenAnswer"`
+	Correct            bool   `json:"correct"`
+	CorrectOptionIndex int    `json:"correctOptionIndex"`
+	CorrectOptionDe    string `json:"correctOptionDe"`
+	CorrectOptionCn    string `json:"correctOptionCn"`
+	Explanation        string `json:"explanation"`
+}
+
+type ExamRecordItem struct {
+	Id        string `json:"id"`
+	StateId   string `json:"stateId"`
+	Total     int    `json:"total"`
+	Score     int    `json:"score"`
+	Passed    bool   `json:"passed"`
+	CreatedAt int64  `json:"createdAt"`
+}
+
 type Filter struct {
 	PageNo   int `form:"pageNo,optional,default=1" json:"pageNo" validate:"omitempty,gte=1"`
 	PageSize int `form:"pageSize,optional,default=10" json:"pageSize" validate:"omitempty,gte=1,lte=100"`
@@ -88,6 +115,23 @@ type GetExamQuestionsRequest struct {
 	StateId string `form:"state_id,optional" json:"state_id,optional"`
 }
 
+type GetExamRecordRequest struct {
+	Id string `path:"id"`
+}
+
+type GetExamRecordResponse struct {
+	Base
+	Data struct {
+		Id        string                 `json:"id"`
+		StateId   string                 `json:"stateId"`
+		Total     int                    `json:"total"`
+		Score     int                    `json:"score"`
+		Passed    bool                   `json:"passed"`
+		Details   []ExamRecordDetailItem `json:"details"`
+		CreatedAt int64                  `json:"createdAt"`
+	} `json:"data"`
+}
+
 type GetInviteCodeRequest struct {
 	ID string `path:"id" json:"id"`
 }
@@ -97,6 +141,18 @@ type GetInviteCodeResponse struct {
 	Data struct {
 		InviteCode
 	} `json:"data"`
+}
+
+type GetLearningProgressResponse struct {
+	Base
+	Data struct {
+		Items []LearningProgressSummary `json:"items"`
+	} `json:"data"`
+}
+
+type GetPreferencesResponse struct {
+	Base
+	Data UserPreferenceData `json:"data"`
 }
 
 type GetQuestionRequest struct {
@@ -144,6 +200,21 @@ type LanguageModeItem struct {
 	Label string `json:"label"`
 }
 
+type LearningProgressSummary struct {
+	StateId        string `json:"stateId"`
+	Total          int    `json:"total"`
+	PracticedCount int    `json:"practicedCount"`
+	CorrectCount   int    `json:"correctCount"`
+}
+
+type ListExamRecordsResponse struct {
+	Base
+	Data struct {
+		Total int64            `json:"total"`
+		Items []ExamRecordItem `json:"items"`
+	} `json:"data"`
+}
+
 type ListInviteCodeRequest struct {
 	Filter
 	AvailableOnly bool `form:"availableOnly,optional"` // 仅查看可用的邀请码（未使用、未过期、已启用）
@@ -167,7 +238,7 @@ type ListQuestionsResponse struct {
 }
 
 type ListResponse struct {
-	Data []interface{} `path:"data" json:"data"`
+	Data []any `path:"data" json:"data"`
 	Filter
 	Total int64 `path:"total" json:"total"`
 }
@@ -190,6 +261,14 @@ type ListUserResponse struct {
 		Filter
 		Total int64  `json:"total"`
 		Items []User `path:"items" json:"items"`
+	} `json:"data"`
+}
+
+type ListWrongQuestionsResponse struct {
+	Base
+	Data struct {
+		Total int64          `json:"total"`
+		Items []QuestionItem `json:"items"`
 	} `json:"data"`
 }
 
@@ -219,6 +298,15 @@ type QuestionItem struct {
 	State         string   `json:"state"`
 }
 
+type RecordPracticeRequest struct {
+	QuestionId string `json:"questionId"`
+	Correct    bool   `json:"correct"`
+}
+
+type RecordPracticeResponse struct {
+	Base
+}
+
 type RegisterRequest struct {
 	Email      string `json:"email"`
 	Password   string `json:"password"`
@@ -232,9 +320,17 @@ type RegisterResponse struct {
 	AuthResponse
 }
 
+type RemoveWrongQuestionRequest struct {
+	QuestionId string `path:"question_id"`
+}
+
+type RemoveWrongQuestionResponse struct {
+	Base
+}
+
 type Response struct {
 	Base
-	Data interface{} `path:"data" json:"data"`
+	Data any `path:"data" json:"data"`
 }
 
 type StateItem struct {
@@ -246,6 +342,41 @@ type StateItem struct {
 
 type StateQuestionsRequest struct {
 	StateId string `path:"state_id"`
+}
+
+type SubmitExamDetailItem struct {
+	QuestionId         string `json:"questionId"`
+	ChosenAnswer       int    `json:"chosenAnswer"`
+	Correct            bool   `json:"correct"`
+	CorrectOptionIndex int    `json:"correctOptionIndex"`
+	CorrectOptionDe    string `json:"correctOptionDe"`
+	CorrectOptionCn    string `json:"correctOptionCn"`
+	Explanation        string `json:"explanation"`
+}
+
+type SubmitExamRequest struct {
+	StateId string         `json:"stateId,optional"`
+	Answers map[string]int `json:"answers"`
+}
+
+type SubmitExamResponse struct {
+	Base
+	Data struct {
+		Id        string                 `json:"id"`
+		Total     int                    `json:"total"`
+		Score     int                    `json:"score"`
+		Passed    bool                   `json:"passed"`
+		Details   []SubmitExamDetailItem `json:"details"`
+		CreatedAt int64                  `json:"createdAt"`
+	} `json:"data"`
+}
+
+type UpdatePreferencesRequest struct {
+	PreferredExamStateId string `json:"preferredExamStateId,optional"`
+}
+
+type UpdatePreferencesResponse struct {
+	Base
 }
 
 type UpdateUserRequest struct {
@@ -273,4 +404,8 @@ type User struct {
 	InviteCode  string `path:"inviteCode" json:"invite_code,omitempty" validate:"omitempty,alphanum,min=4,max=32"`
 	CreatedAt   int64  `path:"createdAt" json:"createdAt,omitempty"`
 	UpdatedAt   int64  `path:"updatedAt" json:"updatedAt,omitempty"`
+}
+
+type UserPreferenceData struct {
+	PreferredExamStateId string `json:"preferredExamStateId"`
 }

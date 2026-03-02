@@ -86,3 +86,10 @@ func (r *QuestionGormRepo) GetRandomByStateID(ctx context.Context, stateID strin
 	err := r.DB.WithContext(ctx).Where("state_id = ?", stateID).Order("RAND()").Limit(n).Find(&list).Error
 	return list, err
 }
+
+// CountByStateID 某州题目总数
+func (r *QuestionGormRepo) CountByStateID(ctx context.Context, stateID string) (int64, error) {
+	var n int64
+	err := r.DB.WithContext(ctx).Model(&gormdb.Question{}).Where("state_id = ?", stateID).Count(&n).Error
+	return n, err
+}

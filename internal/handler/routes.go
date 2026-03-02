@@ -10,6 +10,7 @@ import (
 	auth "deutsch/internal/handler/auth"
 	config "deutsch/internal/handler/config"
 	invitecode "deutsch/internal/handler/invitecode"
+	progress "deutsch/internal/handler/progress"
 	question "deutsch/internal/handler/question"
 	user "deutsch/internal/handler/user"
 	"deutsch/internal/svc"
@@ -130,11 +131,72 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/exams",
+					Handler: progress.ListExamRecordsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/exams",
+					Handler: progress.SubmitExamHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/exams/:id",
+					Handler: progress.GetExamRecordHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/learning",
+					Handler: progress.GetLearningProgressHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/learning",
+					Handler: progress.RecordPracticeHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/preferences",
+					Handler: progress.GetPreferencesHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPatch,
+					Path:    "/preferences",
+					Handler: progress.UpdatePreferencesHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/wrong-questions",
+					Handler: progress.ListWrongQuestionsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/wrong-questions",
+					Handler: progress.AddWrongQuestionHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/wrong-questions/:question_id",
+					Handler: progress.RemoveWrongQuestionHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/progress"),
+		rest.WithTimeout(5000*time.Millisecond),
+	)
+
+	server.AddRoutes(
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/general",
-				Handler: question.GeneralQuestionsHandler(serverCtx),
+				Path:    "/:question_id",
+				Handler: question.GetQuestionHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
@@ -148,13 +210,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/state/:state_id",
-				Handler: question.StateQuestionsHandler(serverCtx),
+				Path:    "/general",
+				Handler: question.GeneralQuestionsHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/:question_id",
-				Handler: question.GetQuestionHandler(serverCtx),
+				Path:    "/state/:state_id",
+				Handler: question.StateQuestionsHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1/questions"),

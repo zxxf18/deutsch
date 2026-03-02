@@ -25,6 +25,7 @@ type ServiceContext struct {
 	InviteCodeRepo      repository.InviteCodeRepository
 	ConfigRepo          repository.ConfigRepository
 	QuestionRepo        repository.QuestionRepository
+	ProgressRepo        repository.ProgressRepository
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -42,5 +43,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		InviteCodeRepo:      repository.NewInviteGormRepo(gormdb.DB),
 		ConfigRepo:          repository.NewConfigGormRepo(gormdb.DB),
 		QuestionRepo:        repository.NewQuestionGormRepo(gormdb.DB),
+		ProgressRepo:        repository.NewProgressGormRepo(gormdb.DB),
 	}
 }

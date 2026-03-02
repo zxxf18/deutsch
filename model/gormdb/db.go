@@ -66,5 +66,9 @@ func AutoMigrate() error {
 		&GermanState{},
 		&Question{},
 		&QuestionOption{},
+		&UserPreference{},
+		&UserQuestionProgress{},
+		&ExamRecord{},
+		&UserWrongQuestion{},
 	)
 }

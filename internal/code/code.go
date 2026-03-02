@@ -72,6 +72,7 @@ const (
 	CodeWeakAreasEmpty            Code = 5004 // weak areas analysis empty
 	CodeAverageScoreError         Code = 5005 // average score calculation error
 	CodeLimitForResultsExceeded   Code = 5006 // results limit exceeded
+	CodeExamRecordNotFound        Code = 5007 // exam record not found
 
 	// System & General Errors (9000-9999)
 	CodeInternalServerError Code = 9001 // internal server error
@@ -135,6 +136,7 @@ var Messages = map[Code]string{
 	CodeWeakAreasEmpty:            "weak areas analysis empty",
 	CodeAverageScoreError:         "average score calculation error",
 	CodeLimitForResultsExceeded:   "results limit exceeded",
+	CodeExamRecordNotFound:        "exam record not found",
 	CodeInternalServerError:       "internal server error",
 	CodeDatabaseError:             "database connection or query error",
 	CodeRedisError:                "Redis operation failed",

@@ -1,0 +1,192 @@
+syntax = "v1"
+
+import "base.api"
+import "question.api"
+
+info(
+    title: "Progress API"
+    desc: "用户偏好、学习进度、考试记录、错题本"
+    author: "zx"
+    date: "2025-10-13"
+    version: "1.0"
+)
+
+// ============ 用户偏好 ============
+type UserPreferenceData {
+    PreferredExamStateId string `json:"preferredExamStateId"`
+}
+
+type GetPreferencesResponse {
+    Base
+    Data UserPreferenceData `json:"data"`
+}
+
+type UpdatePreferencesRequest {
+    PreferredExamStateId string `json:"preferredExamStateId,optional"`
+}
+
+type UpdatePreferencesResponse {
+    Base
+}
+
+// ============ 学习进度 ============
+type LearningProgressSummary {
+    StateId       string `json:"stateId"`
+    Total         int   `json:"total"`
+    PracticedCount int   `json:"practicedCount"`
+    CorrectCount  int   `json:"correctCount"`
+}
+
+type GetLearningProgressResponse {
+    Base
+    Data {
+        Items []LearningProgressSummary `json:"items"`
+    } `json:"data"`
+}
+
+type RecordPracticeRequest {
+    QuestionId string `json:"questionId"`
+    Correct    bool   `json:"correct"`
+}
+
+type RecordPracticeResponse {
+    Base
+}
+
+// ============ 考试记录 ============
+type ExamRecordItem {
+    Id        string  `json:"id"`
+    StateId   string  `json:"stateId"`
+    Total     int     `json:"total"`
+    Score     int     `json:"score"`
+    Passed    bool    `json:"passed"`
+    CreatedAt int64    `json:"createdAt"`
+}
+
+type ListExamRecordsResponse {
+    Base
+    Data {
+        Total int64            `json:"total"`
+        Items []ExamRecordItem `json:"items"`
+    } `json:"data"`
+}
+
+type SubmitExamRequest {
+    StateId string         `json:"stateId,optional"`
+    Answers map[string]int `json:"answers"`
+}
+
+// SubmitExamDetailItem 每题详情：正确选项及解释
+type SubmitExamDetailItem {
+    QuestionId       string `json:"questionId"`
+    ChosenAnswer     int    `json:"chosenAnswer"`
+    Correct         bool   `json:"correct"`
+    CorrectOptionIndex int  `json:"correctOptionIndex"`
+    CorrectOptionDe  string `json:"correctOptionDe"`
+    CorrectOptionCn  string `json:"correctOptionCn"`
+    Explanation     string `json:"explanation"`
+}
+
+type SubmitExamResponse {
+    Base
+    Data {
+        Id        string                 `json:"id"`
+        Total     int                    `json:"total"`
+        Score     int                    `json:"score"`
+        Passed    bool                   `json:"passed"`
+        Details   []SubmitExamDetailItem `json:"details"`
+        CreatedAt int64                  `json:"createdAt"`
+    } `json:"data"`
+}
+
+type GetExamRecordRequest {
+    Id string `path:"id"`
+}
+
+// ExamRecordDetailItem 考试记录每题详情：含正确选项及解释
+type ExamRecordDetailItem {
+    QuestionId       string `json:"questionId"`
+    ChosenAnswer     int    `json:"chosenAnswer"`
+    Correct         bool   `json:"correct"`
+    CorrectOptionIndex int `json:"correctOptionIndex"`
+    CorrectOptionDe string `json:"correctOptionDe"`
+    CorrectOptionCn string `json:"correctOptionCn"`
+    Explanation     string `json:"explanation"`
+}
+
+type GetExamRecordResponse {
+    Base
+    Data {
+        Id        string                 `json:"id"`
+        StateId   string                 `json:"stateId"`
+        Total     int                    `json:"total"`
+        Score     int                    `json:"score"`
+        Passed    bool                   `json:"passed"`
+        Details   []ExamRecordDetailItem `json:"details"`
+        CreatedAt int64                  `json:"createdAt"`
+    } `json:"data"`
+}
+
+// ============ 错题本 ============
+type ListWrongQuestionsResponse {
+    Base
+    Data {
+        Total int64         `json:"total"`
+        Items []QuestionItem `json:"items"`
+    } `json:"data"`
+}
+
+type AddWrongQuestionRequest {
+    QuestionId string `json:"questionId"`
+}
+
+type AddWrongQuestionResponse {
+    Base
+}
+
+type RemoveWrongQuestionRequest {
+    QuestionId string `path:"question_id"`
+}
+
+type RemoveWrongQuestionResponse {
+    Base
+}
+
+@server (
+    prefix:     /api/v1/progress
+    timeout:    5s
+    group:      progress
+    jwt:        JWTAuth
+    middleware: JWTMiddleware
+)
+service Deutsch {
+    @handler GetPreferencesHandler
+    get /preferences returns (GetPreferencesResponse)
+
+    @handler UpdatePreferencesHandler
+    patch /preferences (UpdatePreferencesRequest) returns (UpdatePreferencesResponse)
+
+    @handler GetLearningProgressHandler
+    get /learning returns (GetLearningProgressResponse)
+
+    @handler RecordPracticeHandler
+    post /learning (RecordPracticeRequest) returns (RecordPracticeResponse)
+
+    @handler ListExamRecordsHandler
+    get /exams (Filter) returns (ListExamRecordsResponse)
+
+    @handler SubmitExamHandler
+    post /exams (SubmitExamRequest) returns (SubmitExamResponse)
+
+    @handler GetExamRecordHandler
+    get /exams/:id (GetExamRecordRequest) returns (GetExamRecordResponse)
+
+    @handler ListWrongQuestionsHandler
+    get /wrong-questions (Filter) returns (ListWrongQuestionsResponse)
+
+    @handler AddWrongQuestionHandler
+    post /wrong-questions (AddWrongQuestionRequest) returns (AddWrongQuestionResponse)
+
+    @handler RemoveWrongQuestionHandler
+    delete /wrong-questions/:question_id (RemoveWrongQuestionRequest) returns (RemoveWrongQuestionResponse)
+}

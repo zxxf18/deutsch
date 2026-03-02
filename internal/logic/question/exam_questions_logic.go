@@ -58,8 +58,8 @@ func (l *ExamQuestionsLogic) ExamQuestions(req *types.GetExamQuestionsRequest) (
 	randShuffle(all)
 
 	states, _ := l.svcCtx.ConfigRepo.ListStates(l.ctx)
-	idToSlug := buildStateIDToSlug(states)
-	items, err := buildQuestionItems(l.ctx, l.svcCtx.QuestionRepo, all, idToSlug)
+	idToSlug := BuildStateIDToSlug(states)
+	items, err := BuildQuestionItems(l.ctx, l.svcCtx.QuestionRepo, all, idToSlug)
 	if err != nil {
 		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}

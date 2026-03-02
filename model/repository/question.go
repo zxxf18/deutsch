@@ -16,4 +16,5 @@ type QuestionRepository interface {
 	GetOptionsByQuestionIDs(ctx context.Context, questionIDs []string) (map[string][]*gormdb.QuestionOption, error)
 	GetRandomGeneral(ctx context.Context, n int) ([]*gormdb.Question, error)
 	GetRandomByStateID(ctx context.Context, stateID string, n int) ([]*gormdb.Question, error)
+	CountByStateID(ctx context.Context, stateID string) (int64, error)
 }

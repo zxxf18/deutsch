@@ -53,7 +53,7 @@ func (l *GetQuestionLogic) GetQuestion(req *types.GetQuestionRequest) (resp *typ
 	state := "general"
 	if q.StateID != nil && *q.StateID != "" {
 		states, _ := l.svcCtx.ConfigRepo.ListStates(l.ctx)
-		idToSlug := buildStateIDToSlug(states)
+		idToSlug := BuildStateIDToSlug(states)
 		state = resolveState(q, idToSlug)
 	}
 

@@ -39,7 +39,7 @@ func (l *AllQuestionsLogic) AllQuestions() (resp *types.AllQuestionsByStateRespo
 	}
 
 	states, _ := l.svcCtx.ConfigRepo.ListStates(l.ctx)
-	idToSlug := buildStateIDToSlug(states)
+	idToSlug := BuildStateIDToSlug(states)
 
 	// 按 state key 分组：general 或州 slug
 	grouped := make(map[string][]*gormdb.Question)
@@ -49,7 +49,7 @@ func (l *AllQuestionsLogic) AllQuestions() (resp *types.AllQuestionsByStateRespo
 	}
 
 	for key, qs := range grouped {
-		items, err := buildQuestionItems(l.ctx, l.svcCtx.QuestionRepo, qs, idToSlug)
+		items, err := BuildQuestionItems(l.ctx, l.svcCtx.QuestionRepo, qs, idToSlug)
 		if err != nil {
 			return nil, code.NewCodeError(code.CodeDatabaseError)
 		}

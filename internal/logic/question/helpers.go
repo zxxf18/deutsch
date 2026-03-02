@@ -10,8 +10,8 @@ import (
 	"deutsch/model/repository"
 )
 
-// buildStateIDToSlug 构建州 id -> slug 映射
-func buildStateIDToSlug(states []*gormdb.GermanState) map[string]string {
+// BuildStateIDToSlug 构建州 id -> slug 映射，供 progress 等包复用
+func BuildStateIDToSlug(states []*gormdb.GermanState) map[string]string {
 	m := make(map[string]string, len(states))
 	for _, s := range states {
 		m[s.ID] = s.Slug
@@ -35,9 +35,9 @@ func resolveState(q *gormdb.Question, idToSlug map[string]string) string {
 	return *q.StateID // 降级：未找到则用 id
 }
 
-// buildQuestionItems 批量构建 QuestionItem（含选项与 state 字段）
+// BuildQuestionItems 批量构建 QuestionItem（含选项与 state 字段）
 // idToSlug: 州 id -> slug 映射，nil 时 State 留空
-func buildQuestionItems(ctx context.Context, repo repository.QuestionRepository, questions []*gormdb.Question, idToSlug map[string]string) ([]types.QuestionItem, error) {
+func BuildQuestionItems(ctx context.Context, repo repository.QuestionRepository, questions []*gormdb.Question, idToSlug map[string]string) ([]types.QuestionItem, error) {
 	if len(questions) == 0 {
 		return nil, nil
 	}

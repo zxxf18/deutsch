@@ -37,8 +37,8 @@ func (l *GeneralQuestionsLogic) GeneralQuestions() (resp *types.ListQuestionsRes
 	}
 
 	states, _ := l.svcCtx.ConfigRepo.ListStates(l.ctx)
-	idToSlug := buildStateIDToSlug(states)
-	items, err := buildQuestionItems(l.ctx, l.svcCtx.QuestionRepo, questions, idToSlug)
+	idToSlug := BuildStateIDToSlug(states)
+	items, err := BuildQuestionItems(l.ctx, l.svcCtx.QuestionRepo, questions, idToSlug)
 	if err != nil {
 		return nil, err
 	}

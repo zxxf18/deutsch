@@ -56,8 +56,8 @@ func (l *StateQuestionsLogic) StateQuestions(req *types.StateQuestionsRequest) (
 		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}
 
-	idToSlug := buildStateIDToSlug(states)
-	items, err := buildQuestionItems(l.ctx, l.svcCtx.QuestionRepo, questions, idToSlug)
+	idToSlug := BuildStateIDToSlug(states)
+	items, err := BuildQuestionItems(l.ctx, l.svcCtx.QuestionRepo, questions, idToSlug)
 	if err != nil {
 		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}
