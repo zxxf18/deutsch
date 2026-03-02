@@ -1,0 +1,78 @@
+syntax = "v1"
+
+import "base.api"
+
+info(
+    title: "Question API"
+    desc: "题目查询、通用/州题目、模拟考试抽题"
+    author: "zx"
+    date: "2025-10-13 16:39:11"
+    version: "1.0"
+)
+
+// QuestionItem 题目项（含选项，不含正确答案用于练习）
+// State: "general" 表示通用题，否则为州 slug（如 baden-wuerttemberg）
+type QuestionItem {
+    Id          string   `json:"id"`
+    QuestionDe  string   `json:"questionDe"`
+    QuestionCn  string   `json:"questionCn"`
+    OptionsDe   []string `json:"optionsDe"`
+    OptionsCn   []string `json:"optionsCn"`
+    CorrectAnswer int    `json:"correctAnswer"`
+    Explanation string   `json:"explanation"`
+    HasImage    bool     `json:"hasImage"`
+    State       string   `json:"state"`
+}
+
+type ListQuestionsResponse {
+    Base
+    Data {
+        Total int64         `json:"total"`
+        Items []QuestionItem `json:"items"`
+    } `json:"data"`
+}
+
+type GetQuestionResponse {
+    Base
+    Data QuestionItem `json:"data"`
+}
+
+type StateQuestionsRequest {
+    StateId string `path:"state_id"`
+}
+
+type GetQuestionRequest {
+    QuestionId string `path:"question_id"`
+}
+
+type GetExamQuestionsRequest {
+    StateId string `form:"state_id,optional" json:"state_id,optional"`
+}
+
+// AllQuestionsByStateResponse 所有题目按州分组，key 为 "general"（通用）或州 id/slug，val 为题目数组
+type AllQuestionsByStateResponse {
+    Base
+    Data map[string][]QuestionItem `json:"data"`
+}
+
+@server (
+	prefix:  /api/v1/questions
+	timeout: 3s
+	group:  question
+)
+service Deutsch {
+	@handler GeneralQuestionsHandler
+	get /general returns (ListQuestionsResponse)
+
+	@handler AllQuestionsHandler
+	get /all returns (AllQuestionsByStateResponse)
+
+	@handler ExamQuestionsHandler
+	get /exam (GetExamQuestionsRequest) returns (ListQuestionsResponse)
+
+	@handler StateQuestionsHandler
+	get /state/:state_id (StateQuestionsRequest) returns (ListQuestionsResponse)
+
+	@handler GetQuestionHandler
+	get /:question_id (GetQuestionRequest) returns (GetQuestionResponse)
+}

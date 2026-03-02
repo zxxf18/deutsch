@@ -53,6 +53,7 @@ const (
 	CodeSearchQueryTooLong Code = 3005 // search query too long
 	CodeLimitExceeded      Code = 3006 // limit exceeded (limit > 100)
 	CodeOffsetInvalid      Code = 3007 // invalid offset (offset < 0)
+	CodeStateNotFound      Code = 3008 // state id not found
 
 	// Practice Tests (4000-4999)
 	CodeTestNotFound          Code = 4001 // test not found
@@ -119,6 +120,7 @@ var Messages = map[Code]string{
 	CodeSearchQueryTooLong:        "search query too long",
 	CodeLimitExceeded:             "limit exceeded (limit > 100)",
 	CodeOffsetInvalid:             "invalid offset (offset < 0)",
+	CodeStateNotFound:             "state id not found",
 	CodeTestNotFound:              "test not found",
 	CodeTestTypeInvalid:           "invalid test type (full/mini/category)",
 	CodeTestAlreadyStarted:        "test already started, cannot restart",

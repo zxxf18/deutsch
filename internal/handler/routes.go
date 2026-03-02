@@ -10,6 +10,7 @@ import (
 	auth "deutsch/internal/handler/auth"
 	config "deutsch/internal/handler/config"
 	invitecode "deutsch/internal/handler/invitecode"
+	question "deutsch/internal/handler/question"
 	user "deutsch/internal/handler/user"
 	"deutsch/internal/svc"
 
@@ -125,6 +126,38 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/invitecode"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/general",
+				Handler: question.GeneralQuestionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/all",
+				Handler: question.AllQuestionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/exam",
+				Handler: question.ExamQuestionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/state/:state_id",
+				Handler: question.StateQuestionsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/:question_id",
+				Handler: question.GetQuestionHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1/questions"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)
 

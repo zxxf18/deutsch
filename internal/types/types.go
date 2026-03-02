@@ -3,6 +3,11 @@
 
 package types
 
+type AllQuestionsByStateResponse struct {
+	Base
+	Data map[string][]QuestionItem `json:"data"`
+}
+
 type AppConfigData struct {
 	TotalQuestions int                `json:"totalQuestions"`
 	ExamQuestions  int                `json:"examQuestions"`
@@ -79,6 +84,10 @@ type GetConfigResponse struct {
 	Data AppConfigData `json:"data"`
 }
 
+type GetExamQuestionsRequest struct {
+	StateId string `form:"state_id,optional" json:"state_id,optional"`
+}
+
 type GetInviteCodeRequest struct {
 	ID string `path:"id" json:"id"`
 }
@@ -88,6 +97,15 @@ type GetInviteCodeResponse struct {
 	Data struct {
 		InviteCode
 	} `json:"data"`
+}
+
+type GetQuestionRequest struct {
+	QuestionId string `path:"question_id"`
+}
+
+type GetQuestionResponse struct {
+	Base
+	Data QuestionItem `json:"data"`
 }
 
 type GetUserRequest struct {
@@ -140,8 +158,16 @@ type ListInviteCodeResponse struct {
 	} `json:"data"`
 }
 
+type ListQuestionsResponse struct {
+	Base
+	Data struct {
+		Total int64          `json:"total"`
+		Items []QuestionItem `json:"items"`
+	} `json:"data"`
+}
+
 type ListResponse struct {
-	Data []any `path:"data" json:"data"`
+	Data []interface{} `path:"data" json:"data"`
 	Filter
 	Total int64 `path:"total" json:"total"`
 }
@@ -181,6 +207,18 @@ type LogoutResponse struct {
 	Base
 }
 
+type QuestionItem struct {
+	Id            string   `json:"id"`
+	QuestionDe    string   `json:"questionDe"`
+	QuestionCn    string   `json:"questionCn"`
+	OptionsDe     []string `json:"optionsDe"`
+	OptionsCn     []string `json:"optionsCn"`
+	CorrectAnswer int      `json:"correctAnswer"`
+	Explanation   string   `json:"explanation"`
+	HasImage      bool     `json:"hasImage"`
+	State         string   `json:"state"`
+}
+
 type RegisterRequest struct {
 	Email      string `json:"email"`
 	Password   string `json:"password"`
@@ -196,7 +234,7 @@ type RegisterResponse struct {
 
 type Response struct {
 	Base
-	Data any `path:"data" json:"data"`
+	Data interface{} `path:"data" json:"data"`
 }
 
 type StateItem struct {
@@ -204,6 +242,10 @@ type StateItem struct {
 	Slug   string `json:"slug"`
 	Name   string `json:"name"`
 	NameCn string `json:"nameCn"`
+}
+
+type StateQuestionsRequest struct {
+	StateId string `path:"state_id"`
 }
 
 type UpdateUserRequest struct {

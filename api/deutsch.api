@@ -5,6 +5,7 @@ import "auth.api"
 import "user.api"
 import "invitecode.api"
 import "config.api"
+import "question.api"
 
 service Deutsch {
 	@handler PingHandler

@@ -7,6 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// GeneralStateID 通用题所属的“特殊州”ID，在 german_states 中 slug='general'
+const GeneralStateID = "00000000-0000-0000-0000-000000000001"
+
 // GermanState 德国联邦州
 type GermanState struct {
 	ID        string    `gorm:"primaryKey;type:char(36);not null" json:"id"`

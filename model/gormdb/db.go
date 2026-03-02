@@ -64,5 +64,7 @@ func AutoMigrate() error {
 		&User{},
 		&InviteCode{},
 		&GermanState{},
+		&Question{},
+		&QuestionOption{},
 	)
 }

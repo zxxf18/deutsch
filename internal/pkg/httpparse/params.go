@@ -7,6 +7,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/pathvar"
 )
 
+// PathVar 从 request 提取 path 中指定名称的变量
+func PathVar(r *http.Request, name string) string {
+	if vars := pathvar.Vars(r); vars != nil {
+		if v := vars[name]; v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
 // PathID 从 request 提取 path 中的 id，优先用 pathvar，否则从 URL 解析
 func PathID(r *http.Request) string {
 	if vars := pathvar.Vars(r); vars != nil {
