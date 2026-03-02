@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	keyStates = "deutsch:config:states:v2"
-	keyApp    = "deutsch:config:app:v3"
+	keyStates = "deutsch:config:states:v1"
+	keyApp    = "deutsch:config:app:v1"
 	ttl       = time.Hour // 1 小时，配置类数据变更少
 )
 
