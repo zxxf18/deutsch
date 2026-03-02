@@ -55,10 +55,66 @@ type AllQuestionsByStateResponse {
     Data map[string][]QuestionItem `json:"data"`
 }
 
+// TrialQuestionItem 游客体验题目：不含正确答案与解析，需调用 check 判题
+type TrialQuestionItem {
+    Id         string   `json:"id"`
+    QuestionDe string   `json:"questionDe"`
+    QuestionCn string   `json:"questionCn"`
+    OptionsDe  []string `json:"optionsDe"`
+    OptionsCn  []string `json:"optionsCn"`
+    HasImage   bool     `json:"hasImage"`
+    State      string   `json:"state"`
+}
+
+type TrialListQuestionsResponse {
+    Base
+    Data {
+        Total int64              `json:"total"`
+        Items []TrialQuestionItem `json:"items"`
+    } `json:"data"`
+}
+
+// TrialCheckRequest 游客批量判题请求，questionId -> optionIndex(0-based)
+type TrialCheckRequest {
+    Answers map[string]int `json:"answers"`
+}
+
+// TrialCheckResultItem 单题判题结果
+type TrialCheckResultItem {
+    QuestionId         string `json:"questionId"`
+    Correct            bool   `json:"correct"`
+    CorrectOptionIndex int    `json:"correctOptionIndex"`
+}
+
+// TrialCheckResponse 游客批量判题响应：仅对错与正确选项索引，无解析
+type TrialCheckResponse {
+    Base
+    Data {
+        Results []TrialCheckResultItem `json:"results"`
+    } `json:"data"`
+}
+
+// 游客体验：无需鉴权
 @server (
 	prefix:  /api/v1/questions
 	timeout: 3s
 	group:  question
+)
+service Deutsch {
+	@handler TrialQuestionsHandler
+	get /trial returns (TrialListQuestionsResponse)
+
+	@handler TrialCheckHandler
+	post /trial/check (TrialCheckRequest) returns (TrialCheckResponse)
+}
+
+// 完整题目：需登录
+@server (
+	prefix:     /api/v1/questions
+	timeout:    3s
+	group:      question
+	jwt:        JWTAuth
+	middleware: JWTMiddleware
 )
 service Deutsch {
 	@handler GeneralQuestionsHandler

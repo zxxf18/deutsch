@@ -59,6 +59,7 @@
     "examQuestions": 33,
     "examMinutes": 60,
     "passScore": 17,
+    "trialQuestionCount": 10,
     "languageModes": [
       { "value": "de", "label": "Deutsch" },
       { "value": "cn", "label": "中文" }
@@ -66,6 +67,8 @@
   }
 }
 ```
+
+`trialQuestionCount`：游客体验练习可获取的题目数量。
 
 ---
 
@@ -144,7 +147,75 @@
 
 ## 3. 题目
 
-### 3.1 获取通用题列表
+### 3.1 游客体验题目（无需鉴权）
+
+`GET /api/v1/questions/trial`
+
+供未登录用户体验，返回 `trialQuestionCount` 道随机通用题（默认 10 道）。**不含** `correctAnswer`、`explanation`，需调用判题接口获取对错。
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "total": 10,
+    "items": [
+      {
+        "id": "xxx",
+        "questionDe": "...",
+        "questionCn": "...",
+        "optionsDe": ["A","B","C","D"],
+        "optionsCn": ["...","...","...","..."],
+        "hasImage": false,
+        "state": "general"
+      }
+    ]
+  }
+}
+```
+
+### 3.1.1 游客批量判题（无需鉴权）
+
+`POST /api/v1/questions/trial/check`
+
+**请求体**：`questionId -> optionIndex`（0-based）的映射。
+
+```json
+{
+  "answers": {
+    "9acae2c4-4c1c-4761-8ea3-eee65e3d4089": 1,
+    "da9d299f-706f-4ebd-beb3-db9c90b10b99": 1,
+    "cd16ba2d-ea04-4147-876d-ec9c63f0bad4": 0
+  }
+}
+```
+
+**响应**：每题的判题结果，**不含解析**。
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "results": [
+      {
+        "questionId": "9acae2c4-4c1c-4761-8ea3-eee65e3d4089",
+        "correct": true,
+        "correctOptionIndex": 1
+      },
+      {
+        "questionId": "da9d299f-706f-4ebd-beb3-db9c90b10b99",
+        "correct": false,
+        "correctOptionIndex": 2
+      }
+    ]
+  }
+}
+```
+
+### 3.2 获取通用题列表（需鉴权）
 
 `GET /api/v1/questions/general`
 
@@ -173,13 +244,13 @@
 }
 ```
 
-### 3.2 获取某州题目
+### 3.3 获取某州题目（需鉴权）
 
 `GET /api/v1/questions/state/:state_id`
 
 **路径参数**：`state_id` 为州 ID（如 `5465e833-302f-4de6-9ca4-c082919dfa68`）或 slug（如 `baden-wuerttemberg`）。
 
-### 3.3 模拟考试抽题
+### 3.4 模拟考试抽题（需鉴权）
 
 `GET /api/v1/questions/exam?state_id=xxx`
 
@@ -187,7 +258,7 @@
 
 **响应**：30 道通用题 + 3 道指定州题，结构与 3.1 一致。
 
-### 3.4 获取全部题目（按州分组）
+### 3.5 获取全部题目（按州分组，需鉴权）
 
 `GET /api/v1/questions/all`
 
@@ -203,7 +274,7 @@
 }
 ```
 
-### 3.5 获取单题详情
+### 3.6 获取单题详情（需鉴权）
 
 `GET /api/v1/questions/:question_id`
 

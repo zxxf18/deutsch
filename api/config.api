@@ -31,11 +31,12 @@ type LanguageModeItem {
 }
 
 type AppConfigData {
-    TotalQuestions int                `json:"totalQuestions"`
-    ExamQuestions  int                `json:"examQuestions"`
-    ExamMinutes    int                `json:"examMinutes"`
-    PassScore      int                `json:"passScore"`
-    LanguageModes  []LanguageModeItem `json:"languageModes"`
+    TotalQuestions     int                `json:"totalQuestions"`
+    ExamQuestions      int                `json:"examQuestions"`
+    ExamMinutes        int                `json:"examMinutes"`
+    PassScore          int                `json:"passScore"`
+    TrialQuestionCount int                `json:"trialQuestionCount"`
+    LanguageModes      []LanguageModeItem `json:"languageModes"`
 }
 
 type GetConfigResponse {

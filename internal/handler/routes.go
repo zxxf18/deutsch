@@ -195,30 +195,51 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/:question_id",
-				Handler: question.GetQuestionHandler(serverCtx),
+				Path:    "/trial",
+				Handler: question.TrialQuestionsHandler(serverCtx),
 			},
 			{
-				Method:  http.MethodGet,
-				Path:    "/all",
-				Handler: question.AllQuestionsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/exam",
-				Handler: question.ExamQuestionsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/general",
-				Handler: question.GeneralQuestionsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/state/:state_id",
-				Handler: question.StateQuestionsHandler(serverCtx),
+				Method:  http.MethodPost,
+				Path:    "/trial/check",
+				Handler: question.TrialCheckHandler(serverCtx),
 			},
 		},
+		rest.WithPrefix("/api/v1/questions"),
+		rest.WithTimeout(3000*time.Millisecond),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/:question_id",
+					Handler: question.GetQuestionHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/all",
+					Handler: question.AllQuestionsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/exam",
+					Handler: question.ExamQuestionsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/general",
+					Handler: question.GeneralQuestionsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/state/:state_id",
+					Handler: question.StateQuestionsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/questions"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)

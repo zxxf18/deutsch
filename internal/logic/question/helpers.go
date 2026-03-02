@@ -88,3 +88,51 @@ func toQuestionItem(q *gormdb.Question, opts []*gormdb.QuestionOption, state str
 	item.OptionsCn = optionsCn
 	return item
 }
+
+// BuildTrialQuestionItems 批量构建 TrialQuestionItem（不含 correctAnswer、explanation）
+func BuildTrialQuestionItems(ctx context.Context, repo repository.QuestionRepository, questions []*gormdb.Question, idToSlug map[string]string) ([]types.TrialQuestionItem, error) {
+	if len(questions) == 0 {
+		return nil, nil
+	}
+	ids := make([]string, 0, len(questions))
+	for _, q := range questions {
+		ids = append(ids, q.ID)
+	}
+	optsMap, err := repo.GetOptionsByQuestionIDs(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]types.TrialQuestionItem, 0, len(questions))
+	for _, q := range questions {
+		opts := optsMap[q.ID]
+		state := ""
+		if idToSlug != nil {
+			state = resolveState(q, idToSlug)
+		}
+		items = append(items, toTrialQuestionItem(q, opts, state))
+	}
+	return items, nil
+}
+
+func toTrialQuestionItem(q *gormdb.Question, opts []*gormdb.QuestionOption, state string) types.TrialQuestionItem {
+	item := types.TrialQuestionItem{
+		Id:         q.ID,
+		QuestionDe: q.QuestionDe,
+		QuestionCn: q.QuestionCn,
+		HasImage:   q.HasImage,
+		State:      state,
+	}
+	if len(opts) == 0 {
+		return item
+	}
+	sort.Slice(opts, func(i, j int) bool { return opts[i].OptionIndex < opts[j].OptionIndex })
+	optionsDe := make([]string, 0, len(opts))
+	optionsCn := make([]string, 0, len(opts))
+	for _, o := range opts {
+		optionsDe = append(optionsDe, o.OptionDe)
+		optionsCn = append(optionsCn, o.OptionCn)
+	}
+	item.OptionsDe = optionsDe
+	item.OptionsCn = optionsCn
+	return item
+}

@@ -17,11 +17,12 @@ type AllQuestionsByStateResponse struct {
 }
 
 type AppConfigData struct {
-	TotalQuestions int                `json:"totalQuestions"`
-	ExamQuestions  int                `json:"examQuestions"`
-	ExamMinutes    int                `json:"examMinutes"`
-	PassScore      int                `json:"passScore"`
-	LanguageModes  []LanguageModeItem `json:"languageModes"`
+	TotalQuestions     int                `json:"totalQuestions"`
+	ExamQuestions      int                `json:"examQuestions"`
+	ExamMinutes        int                `json:"examMinutes"`
+	PassScore          int                `json:"passScore"`
+	TrialQuestionCount int                `json:"trialQuestionCount"`
+	LanguageModes      []LanguageModeItem `json:"languageModes"`
 }
 
 type AuthResponse struct {
@@ -369,6 +370,41 @@ type SubmitExamResponse struct {
 		Details   []SubmitExamDetailItem `json:"details"`
 		CreatedAt int64                  `json:"createdAt"`
 	} `json:"data"`
+}
+
+type TrialCheckRequest struct {
+	Answers map[string]int `json:"answers"`
+}
+
+type TrialCheckResponse struct {
+	Base
+	Data struct {
+		Results []TrialCheckResultItem `json:"results"`
+	} `json:"data"`
+}
+
+type TrialCheckResultItem struct {
+	QuestionId         string `json:"questionId"`
+	Correct            bool   `json:"correct"`
+	CorrectOptionIndex int    `json:"correctOptionIndex"`
+}
+
+type TrialListQuestionsResponse struct {
+	Base
+	Data struct {
+		Total int64               `json:"total"`
+		Items []TrialQuestionItem `json:"items"`
+	} `json:"data"`
+}
+
+type TrialQuestionItem struct {
+	Id         string   `json:"id"`
+	QuestionDe string   `json:"questionDe"`
+	QuestionCn string   `json:"questionCn"`
+	OptionsDe  []string `json:"optionsDe"`
+	OptionsCn  []string `json:"optionsCn"`
+	HasImage   bool     `json:"hasImage"`
+	State      string   `json:"state"`
 }
 
 type UpdatePreferencesRequest struct {

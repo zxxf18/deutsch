@@ -14,10 +14,11 @@ import (
 
 // 应用配置常量（可从 DB 或配置文件迁移）
 const (
-	TotalQuestions = 310
-	ExamQuestions  = 33
-	ExamMinutes    = 30
-	PassScore      = 17
+	TotalQuestions     = 310
+	ExamQuestions      = 33
+	ExamMinutes        = 30
+	PassScore          = 17
+	TrialQuestionCount = 10
 )
 
 var languageModes = []types.LanguageModeItem{
@@ -44,11 +45,12 @@ func (l *ConfigLogic) Config() (resp *types.GetConfigResponse, err error) {
 		resp := &types.GetConfigResponse{}
 		resp.Base = *code.BaseSuccessResp()
 		resp.Data = types.AppConfigData{
-			TotalQuestions: TotalQuestions,
-			ExamQuestions:  ExamQuestions,
-			ExamMinutes:    ExamMinutes,
-			PassScore:      PassScore,
-			LanguageModes:  languageModes,
+			TotalQuestions:     TotalQuestions,
+			ExamQuestions:      ExamQuestions,
+			ExamMinutes:        ExamMinutes,
+			PassScore:          PassScore,
+			TrialQuestionCount: TrialQuestionCount,
+			LanguageModes:      languageModes,
 		}
 		return json.Marshal(resp)
 	})
