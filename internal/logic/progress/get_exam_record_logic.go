@@ -68,14 +68,16 @@ func (l *GetExamRecordLogic) GetExamRecord(req *types.GetExamRecordRequest) (res
 	for qid, chosen := range record.Answers {
 		opts := optsMap[qid]
 		correct := false
-		var correctOpt *gormdb.QuestionOption
+		var correctOpt, chosenOpt *gormdb.QuestionOption
 		for _, o := range opts {
+			if o.OptionIndex == chosen {
+				chosenOpt = o
+			}
 			if o.IsCorrect {
 				correctOpt = o
 				if o.OptionIndex == chosen {
 					correct = true
 				}
-				break
 			}
 		}
 		item := types.ExamRecordDetailItem{
@@ -83,12 +85,18 @@ func (l *GetExamRecordLogic) GetExamRecord(req *types.GetExamRecordRequest) (res
 			ChosenAnswer: chosen,
 			Correct:      correct,
 		}
+		if chosenOpt != nil {
+			item.ChosenOptionCn = chosenOpt.OptionCn
+			item.ChosenOptionDe = chosenOpt.OptionDe
+		}
 		if correctOpt != nil {
 			item.CorrectOptionIndex = correctOpt.OptionIndex
 			item.CorrectOptionDe = correctOpt.OptionDe
 			item.CorrectOptionCn = correctOpt.OptionCn
 		}
 		if q := qMap[qid]; q != nil {
+			item.QuestionCn = q.QuestionCn
+			item.QuestionDe = q.QuestionDe
 			item.Explanation = q.Explanation
 		}
 		details = append(details, item)

@@ -74,7 +74,11 @@ type EnableUserResponse struct {
 
 type ExamRecordDetailItem struct {
 	QuestionId         string `json:"questionId"`
+	QuestionCn         string `json:"questionCn"`
+	QuestionDe         string `json:"questionDe"`
 	ChosenAnswer       int    `json:"chosenAnswer"`
+	ChosenOptionCn     string `json:"chosenOptionCn"`
+	ChosenOptionDe     string `json:"chosenOptionDe"`
 	Correct            bool   `json:"correct"`
 	CorrectOptionIndex int    `json:"correctOptionIndex"`
 	CorrectOptionDe    string `json:"correctOptionDe"`
@@ -288,15 +292,16 @@ type LogoutResponse struct {
 }
 
 type QuestionItem struct {
-	Id            string   `json:"id"`
-	QuestionDe    string   `json:"questionDe"`
-	QuestionCn    string   `json:"questionCn"`
-	OptionsDe     []string `json:"optionsDe"`
-	OptionsCn     []string `json:"optionsCn"`
-	CorrectAnswer int      `json:"correctAnswer"`
-	Explanation   string   `json:"explanation"`
-	HasImage      bool     `json:"hasImage"`
-	State         string   `json:"state"`
+	Id               string   `json:"id"`
+	QuestionDe       string   `json:"questionDe"`
+	QuestionCn       string   `json:"questionCn"`
+	OptionsDe        []string `json:"optionsDe"`
+	OptionsCn        []string `json:"optionsCn"`
+	OptionsImagePath []string `json:"optionsImagePath,omitempty"`
+	CorrectAnswer    int      `json:"correctAnswer"`
+	Explanation      string   `json:"explanation"`
+	HasImage         bool     `json:"hasImage"`
+	State            string   `json:"state"`
 }
 
 type RecordPracticeRequest struct {
@@ -398,13 +403,14 @@ type TrialListQuestionsResponse struct {
 }
 
 type TrialQuestionItem struct {
-	Id         string   `json:"id"`
-	QuestionDe string   `json:"questionDe"`
-	QuestionCn string   `json:"questionCn"`
-	OptionsDe  []string `json:"optionsDe"`
-	OptionsCn  []string `json:"optionsCn"`
-	HasImage   bool     `json:"hasImage"`
-	State      string   `json:"state"`
+	Id               string   `json:"id"`
+	QuestionDe       string   `json:"questionDe"`
+	QuestionCn       string   `json:"questionCn"`
+	OptionsDe        []string `json:"optionsDe"`
+	OptionsCn        []string `json:"optionsCn"`
+	OptionsImagePath []string `json:"optionsImagePath,omitempty"`
+	HasImage         bool     `json:"hasImage"`
+	State            string   `json:"state"`
 }
 
 type UpdatePreferencesRequest struct {

@@ -103,15 +103,19 @@ type GetExamRecordRequest {
     Id string `path:"id"`
 }
 
-// ExamRecordDetailItem 考试记录每题详情：含正确选项及解释
+// ExamRecordDetailItem 考试记录每题详情：含题目、正确选项及解释
 type ExamRecordDetailItem {
-    QuestionId       string `json:"questionId"`
-    ChosenAnswer     int    `json:"chosenAnswer"`
-    Correct         bool   `json:"correct"`
-    CorrectOptionIndex int `json:"correctOptionIndex"`
-    CorrectOptionDe string `json:"correctOptionDe"`
-    CorrectOptionCn string `json:"correctOptionCn"`
-    Explanation     string `json:"explanation"`
+    QuestionId        string `json:"questionId"`
+    QuestionCn        string `json:"questionCn"`
+    QuestionDe        string `json:"questionDe"`
+    ChosenAnswer      int    `json:"chosenAnswer"`
+    ChosenOptionCn    string `json:"chosenOptionCn"`
+    ChosenOptionDe    string `json:"chosenOptionDe"`
+    Correct           bool   `json:"correct"`
+    CorrectOptionIndex int   `json:"correctOptionIndex"`
+    CorrectOptionDe   string `json:"correctOptionDe"`
+    CorrectOptionCn   string `json:"correctOptionCn"`
+    Explanation       string `json:"explanation"`
 }
 
 type GetExamRecordResponse {

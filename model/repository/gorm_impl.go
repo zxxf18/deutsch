@@ -26,12 +26,18 @@ func (r *UserGormRepo) Create(ctx context.Context, user *gormdb.User) error {
 func (r *UserGormRepo) GetByEmail(ctx context.Context, email string) (*gormdb.User, error) {
 	var user gormdb.User
 	err := r.DB.WithContext(ctx).Where("email = ?", email).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
 	return &user, err
 }
 
 func (r *UserGormRepo) GetByEmailIncludingDeleted(ctx context.Context, email string) (*gormdb.User, error) {
 	var user gormdb.User
 	err := r.DB.WithContext(ctx).Unscoped().Where("email = ?", email).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
 	return &user, err
 }
 

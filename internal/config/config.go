@@ -17,5 +17,6 @@ type Config struct {
 	MySQL struct {
 		DataSource string // DSN: user:pass@tcp(host:port)/dbname?charset=utf8mb4&parseTime=True
 	}
-	Redis redis.RedisConf
+	Redis     redis.RedisConf
+	AssetsDir string `json:",optional"` // 静态资源目录，默认 assets
 }

@@ -41,6 +41,7 @@ type QuestionOption struct {
 	OptionDe    string `gorm:"column:option_de;type:varchar(500);not null" json:"optionDe"`
 	OptionCn    string `gorm:"column:option_cn;type:varchar(500)" json:"optionCn"`
 	IsCorrect   bool   `gorm:"column:is_correct;default:false" json:"isCorrect"`
+	ImagePath   string `gorm:"column:image_path;type:varchar(255)" json:"imagePath,omitempty"` // 选项对应的图片路径，如 wappen/berlin.svg（仅 has_image 题目）
 }
 
 // TableName 指定表名

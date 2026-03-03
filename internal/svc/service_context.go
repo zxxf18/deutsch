@@ -4,6 +4,8 @@
 package svc
 
 import (
+	"path/filepath"
+
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/rest"
 
@@ -16,6 +18,7 @@ import (
 
 type ServiceContext struct {
 	Config              config.Config
+	AssetsDir           string
 	Redis               *redis.Redis
 	TokenBlacklist      *blacklist.TokenBlacklist
 	JWTMiddleware       rest.Middleware
@@ -32,8 +35,15 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	rds := redis.MustNewRedis(c.Redis)
 	tokenBlacklist := blacklist.NewTokenBlacklist(rds)
 
+	assetsDir := c.AssetsDir
+	if assetsDir == "" {
+		assetsDir = "assets"
+	}
+	assetsDir, _ = filepath.Abs(assetsDir)
+
 	return &ServiceContext{
 		Config:              c,
+		AssetsDir:           assetsDir,
 		Redis:               rds,
 		TokenBlacklist:      tokenBlacklist,
 		JWTMiddleware:       middleware.NewJWTMiddleware(c).Handle,

@@ -13,8 +13,9 @@ import (
 )
 
 // 应用配置常量（可从 DB 或配置文件迁移）
+// 300 通用题 + 16 州 × 10 州题 = 460
 const (
-	TotalQuestions     = 310
+	TotalQuestions     = 460
 	ExamQuestions      = 33
 	ExamMinutes        = 30
 	PassScore          = 17

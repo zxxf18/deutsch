@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	assets "deutsch/internal/handler/assets"
 	auth "deutsch/internal/handler/auth"
 	config "deutsch/internal/handler/config"
 	invitecode "deutsch/internal/handler/invitecode"
@@ -75,6 +76,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/states",
 				Handler: config.StatesHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/assets/wappen/:file",
+				Handler: assets.AssetsHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),

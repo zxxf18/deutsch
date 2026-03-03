@@ -12,16 +12,18 @@ info(
 
 // QuestionItem 题目项（含选项，不含正确答案用于练习）
 // State: "general" 表示通用题，否则为州 slug（如 baden-wuerttemberg）
+// OptionsImagePath: 仅 hasImage 题目有值，与 optionsDe 一一对应，通过 GET /api/v1/assets/:path 获取
 type QuestionItem {
-    Id          string   `json:"id"`
-    QuestionDe  string   `json:"questionDe"`
-    QuestionCn  string   `json:"questionCn"`
-    OptionsDe   []string `json:"optionsDe"`
-    OptionsCn   []string `json:"optionsCn"`
-    CorrectAnswer int    `json:"correctAnswer"`
-    Explanation string   `json:"explanation"`
-    HasImage    bool     `json:"hasImage"`
-    State       string   `json:"state"`
+    Id                string   `json:"id"`
+    QuestionDe        string   `json:"questionDe"`
+    QuestionCn        string   `json:"questionCn"`
+    OptionsDe         []string `json:"optionsDe"`
+    OptionsCn         []string `json:"optionsCn"`
+    OptionsImagePath  []string `json:"optionsImagePath,omitempty"`
+    CorrectAnswer      int      `json:"correctAnswer"`
+    Explanation        string   `json:"explanation"`
+    HasImage           bool     `json:"hasImage"`
+    State              string   `json:"state"`
 }
 
 type ListQuestionsResponse {
@@ -57,13 +59,14 @@ type AllQuestionsByStateResponse {
 
 // TrialQuestionItem 游客体验题目：不含正确答案与解析，需调用 check 判题
 type TrialQuestionItem {
-    Id         string   `json:"id"`
-    QuestionDe string   `json:"questionDe"`
-    QuestionCn string   `json:"questionCn"`
-    OptionsDe  []string `json:"optionsDe"`
-    OptionsCn  []string `json:"optionsCn"`
-    HasImage   bool     `json:"hasImage"`
-    State      string   `json:"state"`
+    Id                string   `json:"id"`
+    QuestionDe        string   `json:"questionDe"`
+    QuestionCn        string   `json:"questionCn"`
+    OptionsDe         []string `json:"optionsDe"`
+    OptionsCn         []string `json:"optionsCn"`
+    OptionsImagePath  []string `json:"optionsImagePath,omitempty"`
+    HasImage           bool     `json:"hasImage"`
+    State              string   `json:"state"`
 }
 
 type TrialListQuestionsResponse {

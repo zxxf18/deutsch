@@ -77,15 +77,25 @@ func toQuestionItem(q *gormdb.Question, opts []*gormdb.QuestionOption, state str
 	sort.Slice(opts, func(i, j int) bool { return opts[i].OptionIndex < opts[j].OptionIndex })
 	optionsDe := make([]string, 0, len(opts))
 	optionsCn := make([]string, 0, len(opts))
+	var optionsImagePath []string
+	if q.HasImage {
+		optionsImagePath = make([]string, 0, len(opts))
+	}
 	for _, o := range opts {
 		optionsDe = append(optionsDe, o.OptionDe)
 		optionsCn = append(optionsCn, o.OptionCn)
+		if q.HasImage && o.ImagePath != "" {
+			optionsImagePath = append(optionsImagePath, o.ImagePath)
+		} else if q.HasImage {
+			optionsImagePath = append(optionsImagePath, "")
+		}
 		if o.IsCorrect {
 			item.CorrectAnswer = o.OptionIndex
 		}
 	}
 	item.OptionsDe = optionsDe
 	item.OptionsCn = optionsCn
+	item.OptionsImagePath = optionsImagePath
 	return item
 }
 
@@ -128,11 +138,21 @@ func toTrialQuestionItem(q *gormdb.Question, opts []*gormdb.QuestionOption, stat
 	sort.Slice(opts, func(i, j int) bool { return opts[i].OptionIndex < opts[j].OptionIndex })
 	optionsDe := make([]string, 0, len(opts))
 	optionsCn := make([]string, 0, len(opts))
+	var optionsImagePath []string
+	if q.HasImage {
+		optionsImagePath = make([]string, 0, len(opts))
+	}
 	for _, o := range opts {
 		optionsDe = append(optionsDe, o.OptionDe)
 		optionsCn = append(optionsCn, o.OptionCn)
+		if q.HasImage && o.ImagePath != "" {
+			optionsImagePath = append(optionsImagePath, o.ImagePath)
+		} else if q.HasImage {
+			optionsImagePath = append(optionsImagePath, "")
+		}
 	}
 	item.OptionsDe = optionsDe
 	item.OptionsCn = optionsCn
+	item.OptionsImagePath = optionsImagePath
 	return item
 }

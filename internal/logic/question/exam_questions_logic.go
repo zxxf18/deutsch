@@ -35,6 +35,12 @@ func (l *ExamQuestionsLogic) ExamQuestions(req *types.GetExamQuestionsRequest) (
 	const examGeneral = 30
 	const examState = 3
 
+	// 模拟考试必须指定联邦州（不可用通用），否则无法抽取 3 道州题
+	stateIDForExam := req.StateId
+	if stateIDForExam == "" || stateIDForExam == gormdb.GeneralStateID {
+		return nil, code.NewCodeErrorWithMsg(code.CodeStateNotFound, "请先选择联邦州，模拟考试需包含 30 道通用题 + 3 道州题")
+	}
+
 	generalList, err := l.svcCtx.QuestionRepo.GetRandomGeneral(l.ctx, examGeneral)
 	if err != nil {
 		l.Errorf("failed to get exam general questions: %+v", err)
@@ -42,18 +48,14 @@ func (l *ExamQuestionsLogic) ExamQuestions(req *types.GetExamQuestionsRequest) (
 	}
 
 	var stateList []*gormdb.Question
-	if req.StateId != "" {
-		stateList, err = l.svcCtx.QuestionRepo.GetRandomByStateID(l.ctx, req.StateId, examState)
-		if err != nil {
-			l.Errorf("failed to get exam state questions: %+v", err)
-			return nil, code.NewCodeError(code.CodeDatabaseError)
-		}
+	stateList, err = l.svcCtx.QuestionRepo.GetRandomByStateID(l.ctx, stateIDForExam, examState)
+	if err != nil {
+		l.Errorf("failed to get exam state questions: %+v", err)
+		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}
 
 	all := append([]*gormdb.Question(nil), generalList...)
-	if len(stateList) > 0 {
-		all = append(all, stateList...)
-	}
+	all = append(all, stateList...)
 	// 打乱顺序
 	randShuffle(all)
 
