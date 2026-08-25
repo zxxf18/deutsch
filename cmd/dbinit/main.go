@@ -19,7 +19,7 @@ var (
 	resetUsers    = flag.Bool("reset-users", false, "delete all users and user-owned data before creating the admin")
 	adminUser     = flag.String("admin-username", "admin", "administrator username")
 	adminEmail    = flag.String("admin-email", "admin@example.com", "administrator login email")
-	adminPassword = flag.String("admin-password", "admin120420", "administrator password (prefer DEUTSCH_ADMIN_PASSWORD to avoid process-list exposure)")
+	adminPassword = flag.String("admin-password", "123456678", "administrator password (prefer DEUTSCH_ADMIN_PASSWORD to avoid process-list exposure)")
 )
 
 func main() {

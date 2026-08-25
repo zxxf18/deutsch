@@ -57,7 +57,7 @@ Redis:
 ```bash
 mysql --default-character-set=utf8mb4 -u root -p < scripts/schema/init_data.sql
 
-# 创建默认管理员：admin / admin@example.com / admin120420
+# 创建默认管理员：admin / admin@example.com / 123456678
 # 固定默认密码仅用于初始化，部署后应立即替换
 go run ./cmd/dbinit -f etc/deutsch.yaml
 ```

@@ -14,4 +14,4 @@ build-linux-amd64:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o dist/deutsch-dbinit-linux-amd64 ./cmd/dbinit
 
 init-db:
-	DEUTSCH_ADMIN_PASSWORD="$${ADMIN_PASSWORD:-admin120420}" go run ./cmd/dbinit -f "$${CONFIG_FILE:-etc/deutsch.yaml}" -admin-username "$${ADMIN_USERNAME:-admin}" -admin-email "$${ADMIN_EMAIL:-admin@example.com}"
+	DEUTSCH_ADMIN_PASSWORD="$${ADMIN_PASSWORD:-123456678}" go run ./cmd/dbinit -f "$${CONFIG_FILE:-etc/deutsch.yaml}" -admin-username "$${ADMIN_USERNAME:-admin}" -admin-email "$${ADMIN_EMAIL:-admin@example.com}"
