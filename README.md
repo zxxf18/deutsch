@@ -57,8 +57,9 @@ Redis:
 ```bash
 mysql -u root -p < scripts/schema/init_data.sql
 
-# 创建管理员（示例密码仅用于演示，请在部署时替换）
-DEUTSCH_ADMIN_PASSWORD='ExampleOnly_987!' go run ./cmd/dbinit -f etc/deutsch.yaml
+# 创建默认管理员：admin / admin@example.com / admin120420
+# 固定默认密码仅用于初始化，部署后应立即替换
+go run ./cmd/dbinit -f etc/deutsch.yaml
 ```
 
 ### 3. 运行
@@ -81,7 +82,7 @@ go run deutsch.go -f etc/deutsch.yaml
 | `make api` | 根据 api 定义重新生成代码 |
 | `make build` | 编译项目 |
 | `make build-linux-amd64` | 交叉编译 Linux amd64 服务和数据库初始化工具 |
-| `make init-db ADMIN_PASSWORD='ExampleOnly_987!'` | 创建或更新管理员 |
+| `make init-db` | 创建默认管理员（可通过 ADMIN_PASSWORD 等变量覆盖） |
 
 ## 接口文档
 

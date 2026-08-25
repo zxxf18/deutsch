@@ -27,11 +27,11 @@ source /path/to/init_data.sql;
 `etc/deutsch.yaml` 后执行：
 
 ```bash
-DEUTSCH_ADMIN_PASSWORD='ExampleOnly_987!' go run ./cmd/dbinit \
-  -f etc/deutsch.yaml \
-  -admin-username admin \
-  -admin-email admin@deutsch.local
+go run ./cmd/dbinit -f etc/deutsch.yaml
 ```
+
+默认管理员为 `admin / admin@example.com / admin120420`。固定默认密码仅适用于初始化，
+部署后应立即通过 `DEUTSCH_ADMIN_PASSWORD` 或 `-admin-password` 覆盖。
 
 如需清空现有用户、学习进度、考试记录、错题和邀请码后重建管理员，追加
 `-reset-users`。此参数会删除用户相关数据，仅用于明确的重置操作。
