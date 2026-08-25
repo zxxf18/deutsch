@@ -5,7 +5,7 @@
 首次部署或重建库后，执行 `init_data.sql` 插入初始数据：
 
 ```bash
-mysql -u <user> -p <dbname> < init_data.sql
+mysql --default-character-set=utf8mb4 -u <user> -p <dbname> < init_data.sql
 ```
 
 或使用 MySQL 客户端：

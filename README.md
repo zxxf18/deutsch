@@ -55,7 +55,7 @@ Redis:
 ### 2. 初始化数据库
 
 ```bash
-mysql -u root -p < scripts/schema/init_data.sql
+mysql --default-character-set=utf8mb4 -u root -p < scripts/schema/init_data.sql
 
 # 创建默认管理员：admin / admin@example.com / admin120420
 # 固定默认密码仅用于初始化，部署后应立即替换
