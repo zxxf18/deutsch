@@ -12,6 +12,7 @@ import (
 	"deutsch/internal/config"
 	"deutsch/internal/middleware"
 	"deutsch/internal/pkg/blacklist"
+	"deutsch/internal/pkg/passwordcrypto"
 	"deutsch/model/gormdb"
 	"deutsch/model/repository"
 )
@@ -29,11 +30,16 @@ type ServiceContext struct {
 	ConfigRepo          repository.ConfigRepository
 	QuestionRepo        repository.QuestionRepository
 	ProgressRepo        repository.ProgressRepository
+	PasswordCipher      *passwordcrypto.Cipher
 }
 
-func NewServiceContext(c config.Config) *ServiceContext {
+func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	rds := redis.MustNewRedis(c.Redis)
 	tokenBlacklist := blacklist.NewTokenBlacklist(rds)
+	passwordCipher, err := passwordcrypto.New(c.PasswordEncryption.Key)
+	if err != nil {
+		return nil, err
+	}
 
 	assetsDir := c.AssetsDir
 	if assetsDir == "" {
@@ -54,5 +60,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ConfigRepo:          repository.NewConfigGormRepo(gormdb.DB),
 		QuestionRepo:        repository.NewQuestionGormRepo(gormdb.DB),
 		ProgressRepo:        repository.NewProgressGormRepo(gormdb.DB),
-	}
+		PasswordCipher:      passwordCipher,
+	}, nil
 }

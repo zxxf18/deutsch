@@ -17,6 +17,9 @@ type Config struct {
 	MySQL struct {
 		DataSource string // DSN: user:pass@tcp(host:port)/dbname?charset=utf8mb4&parseTime=True
 	}
+	PasswordEncryption struct {
+		Key string // key material is SHA-256-derived for AES-256; inject through an untracked runtime config
+	}
 	Redis     redis.RedisConf
 	AssetsDir string `json:",optional"` // 静态资源目录，默认 assets
 }

@@ -21,4 +21,19 @@ source /path/to/init_data.sql;
 - **州徽图片**：运行 `cd .. && python3 fetch_and_update.py` 从 Wikipedia Commons 下载并保存到 `assets/wappen/`，同时更新 init_data.sql 中的 image_path
 - **users**、**invite_codes**：可选，取消注释后执行
 
+## 创建或重置管理员
+
+管理员密码由应用使用 AES-256-GCM 加密，不能直接写入 SQL。配置好未跟踪的
+`etc/deutsch.yaml` 后执行：
+
+```bash
+DEUTSCH_ADMIN_PASSWORD='ExampleOnly_987!' go run ./cmd/dbinit \
+  -f etc/deutsch.yaml \
+  -admin-username admin \
+  -admin-email admin@deutsch.local
+```
+
+如需清空现有用户、学习进度、考试记录、错题和邀请码后重建管理员，追加
+`-reset-users`。此参数会删除用户相关数据，仅用于明确的重置操作。
+
 **题目数据**：从 deutsch-fe 的 `general-questions.md`、`state-questions.md` 提取。

@@ -1,0 +1,19 @@
+Name: deutsch
+Host: 0.0.0.0
+Port: 8888
+
+JWTAuth:
+  AccessSecret: "replace-with-a-random-secret"
+  AccessExpire: 7200
+
+MySQL:
+  DataSource: "deutsch_user:replace-me@tcp(127.0.0.1:3306)/deutsch?charset=utf8mb4&parseTime=True"
+
+PasswordEncryption:
+  # Use high-entropy key material. Never commit the production value.
+  Key: "replace-with-random-key-material"
+
+Redis:
+  Host: "localhost:6379"
+  Type: "node"
+  Pass: ""

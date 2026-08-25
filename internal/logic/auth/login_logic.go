@@ -2,8 +2,6 @@ package auth
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 
 	"deutsch/internal/code"
 	"deutsch/internal/pkg/jwt"
@@ -67,9 +65,7 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 		return nil, code.NewCodeError(code.CodeUserDisabled)
 	}
 
-	hash := sha256.Sum256([]byte(req.Password))
-	passwordHash := hex.EncodeToString(hash[:])
-	if user.PasswordHash != passwordHash {
+	if !l.svcCtx.PasswordCipher.Matches(user.PasswordEncrypted, req.Password) {
 		return nil, code.NewCodeError(code.CodeInvalidCredentials)
 	}
 

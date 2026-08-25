@@ -2,8 +2,6 @@ package auth
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"strings"
 
 	"deutsch/internal/code"
@@ -77,8 +75,11 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		username = username[:50]
 	}
 
-	hash := sha256.Sum256([]byte(req.Password))
-	passwordHash := hex.EncodeToString(hash[:])
+	passwordEncrypted, err := l.svcCtx.PasswordCipher.Encrypt(req.Password)
+	if err != nil {
+		l.Errorf("failed to encrypt password: %+v", err)
+		return nil, code.NewCodeError(code.CodeInternalServerError)
+	}
 
 	var phone *string
 	if req.Phone != "" {
@@ -91,7 +92,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 			// 方案B：已删除用户用同邮箱重新注册 -> 恢复账号
 			existed.DeletedAt = gorm.DeletedAt{}
 			existed.Username = username
-			existed.PasswordHash = passwordHash
+			existed.PasswordEncrypted = passwordEncrypted
 			existed.Phone = phone
 			existed.Nickname = req.Nickname
 			existed.IsEnabled = true
@@ -110,13 +111,13 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		}
 	} else {
 		user = &gormdb.User{
-			Username:     username,
-			Email:        req.Email,
-			Phone:        phone,
-			PasswordHash: passwordHash,
-			Role:         "user",
-			Nickname:     req.Nickname,
-			IsEnabled:    true,
+			Username:          username,
+			Email:             req.Email,
+			Phone:             phone,
+			PasswordEncrypted: passwordEncrypted,
+			Role:              "user",
+			Nickname:          req.Nickname,
+			IsEnabled:         true,
 		}
 		if err := l.svcCtx.UserRepo.Create(l.ctx, user); err != nil {
 			l.Errorf("failed to create user: %+v", err)

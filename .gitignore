@@ -4,10 +4,12 @@
 output*
 .*.swp
 .*.swo
-/etc
+/etc/*.yaml
+!/etc/*.example.yaml
 /**/var
 /**/.DS_Store
 deutsch
+/dist/
 .idea
 .vscode
 /vendor

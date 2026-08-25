@@ -26,20 +26,10 @@ INSERT INTO german_states (id, slug, name, name_cn, sort_order, created_at, upda
 ON DUPLICATE KEY UPDATE updated_at = NOW();
 
 -- ============================================================
--- 2. 管理员用户（可选，首次部署时创建）
--- 密码为 123456 的 SHA256 哈希
+-- 2. 管理员用户
+-- 密码必须使用运行时 AES-256 密钥加密，不能在 SQL 中安全地生成。
+-- 请执行 cmd/dbinit（或 make init-db），不要在此文件硬编码密钥或密码。
 -- ============================================================
--- INSERT INTO users (id, username, email, password_hash, role, is_enabled, created_at, updated_at)
--- VALUES (
---   UUID(),
---   'admin001',
---   'admin@example.com',
---   '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
---   'admin',
---   1,
---   NOW(),
---   NOW()
--- );
 
 -- ============================================================
 -- 3. 初始邀请码（可选，用于首次注册后改 role）

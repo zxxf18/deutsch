@@ -41,6 +41,11 @@ JWTAuth:
 MySQL:
   DataSource: "user:pass@tcp(host:3306)/deutsch?charset=utf8mb4&parseTime=True"
 
+PasswordEncryption:
+  # 使用高熵密钥材料；程序通过 SHA-256 派生 AES-256 密钥
+  # 真实值只放在未跟踪的 etc/deutsch.yaml 中
+  Key: "replace-with-random-key-material"
+
 Redis:
   Host: "localhost:6379"
   Type: "node"
@@ -51,6 +56,9 @@ Redis:
 
 ```bash
 mysql -u root -p < scripts/schema/init_data.sql
+
+# 创建管理员（示例密码仅用于演示，请在部署时替换）
+DEUTSCH_ADMIN_PASSWORD='ExampleOnly_987!' go run ./cmd/dbinit -f etc/deutsch.yaml
 ```
 
 ### 3. 运行
@@ -72,6 +80,8 @@ go run deutsch.go -f etc/deutsch.yaml
 |------|------|
 | `make api` | 根据 api 定义重新生成代码 |
 | `make build` | 编译项目 |
+| `make build-linux-amd64` | 交叉编译 Linux amd64 服务和数据库初始化工具 |
+| `make init-db ADMIN_PASSWORD='ExampleOnly_987!'` | 创建或更新管理员 |
 
 ## 接口文档
 
