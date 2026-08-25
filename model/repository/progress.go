@@ -14,10 +14,12 @@ type ProgressRepository interface {
 
 	// Learning progress
 	UpsertQuestionProgress(ctx context.Context, userID, questionID string, correct bool) error
+	RecordPractice(ctx context.Context, userID, questionID string, correct bool) error
 	GetProgressByUser(ctx context.Context, userID string) ([]*gormdb.UserQuestionProgress, error)
 
 	// Exam records
 	CreateExamRecord(ctx context.Context, record *gormdb.ExamRecord) error
+	CreateExamRecordWithWrongQuestions(ctx context.Context, record *gormdb.ExamRecord, wrongQuestionIDs []string) error
 	GetExamRecordsByUser(ctx context.Context, userID string, offset, limit int) ([]*gormdb.ExamRecord, int64, error)
 	GetExamRecordByID(ctx context.Context, id, userID string) (*gormdb.ExamRecord, error)
 

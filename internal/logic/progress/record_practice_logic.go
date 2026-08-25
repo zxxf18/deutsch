@@ -48,7 +48,7 @@ func (l *RecordPracticeLogic) RecordPractice(req *types.RecordPracticeRequest) (
 		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}
 
-	if err := l.svcCtx.ProgressRepo.UpsertQuestionProgress(l.ctx, userID, req.QuestionId, req.Correct); err != nil {
+	if err := l.svcCtx.ProgressRepo.RecordPractice(l.ctx, userID, req.QuestionId, req.Correct); err != nil {
 		l.Errorf("failed to upsert progress: %+v", err)
 		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}

@@ -75,6 +75,19 @@ func (r *ProgressGormRepo) UpsertQuestionProgress(ctx context.Context, userID, q
 	return r.DB.WithContext(ctx).Model(&p).Updates(upd).Error
 }
 
+func (r *ProgressGormRepo) RecordPractice(ctx context.Context, userID, questionID string, correct bool) error {
+	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txRepo := &ProgressGormRepo{DB: tx}
+		if err := txRepo.UpsertQuestionProgress(ctx, userID, questionID, correct); err != nil {
+			return err
+		}
+		if !correct {
+			return txRepo.AddWrongQuestion(ctx, userID, questionID)
+		}
+		return nil
+	})
+}
+
 func (r *ProgressGormRepo) GetProgressByUser(ctx context.Context, userID string) ([]*gormdb.UserQuestionProgress, error) {
 	var list []*gormdb.UserQuestionProgress
 	err := r.DB.WithContext(ctx).Where("user_id = ?", userID).Find(&list).Error
@@ -83,6 +96,21 @@ func (r *ProgressGormRepo) GetProgressByUser(ctx context.Context, userID string)
 
 func (r *ProgressGormRepo) CreateExamRecord(ctx context.Context, record *gormdb.ExamRecord) error {
 	return r.DB.WithContext(ctx).Create(record).Error
+}
+
+func (r *ProgressGormRepo) CreateExamRecordWithWrongQuestions(ctx context.Context, record *gormdb.ExamRecord, wrongQuestionIDs []string) error {
+	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txRepo := &ProgressGormRepo{DB: tx}
+		if err := txRepo.CreateExamRecord(ctx, record); err != nil {
+			return err
+		}
+		for _, questionID := range wrongQuestionIDs {
+			if err := txRepo.AddWrongQuestion(ctx, record.UserID, questionID); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (r *ProgressGormRepo) GetExamRecordsByUser(ctx context.Context, userID string, offset, limit int) ([]*gormdb.ExamRecord, int64, error) {

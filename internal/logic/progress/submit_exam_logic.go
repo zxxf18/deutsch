@@ -64,6 +64,7 @@ func (l *SubmitExamLogic) SubmitExam(req *types.SubmitExamRequest) (resp *types.
 
 	score := 0
 	total := len(req.Answers)
+	wrongQuestionIDs := make([]string, 0, total)
 	details := make([]types.SubmitExamDetailItem, 0, total)
 	for qid, chosen := range req.Answers {
 		opts := optsMap[qid]
@@ -83,6 +84,9 @@ func (l *SubmitExamLogic) SubmitExam(req *types.SubmitExamRequest) (resp *types.
 			QuestionId:   qid,
 			ChosenAnswer: chosen,
 			Correct:      correct,
+		}
+		if !correct {
+			wrongQuestionIDs = append(wrongQuestionIDs, qid)
 		}
 		if correctOpt != nil {
 			item.CorrectOptionIndex = correctOpt.OptionIndex
@@ -109,7 +113,7 @@ func (l *SubmitExamLogic) SubmitExam(req *types.SubmitExamRequest) (resp *types.
 		Answers: gormdb.ExamAnswers(req.Answers),
 	}
 
-	if err := l.svcCtx.ProgressRepo.CreateExamRecord(l.ctx, record); err != nil {
+	if err := l.svcCtx.ProgressRepo.CreateExamRecordWithWrongQuestions(l.ctx, record, wrongQuestionIDs); err != nil {
 		l.Errorf("failed to create exam record: %+v", err)
 		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}
