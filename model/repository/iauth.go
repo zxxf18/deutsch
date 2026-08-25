@@ -24,7 +24,9 @@ type UserRepository interface {
 	Create(ctx context.Context, user *gormdb.User) error
 	GetByEmail(ctx context.Context, email string) (*gormdb.User, error)
 	GetByEmailIncludingDeleted(ctx context.Context, email string) (*gormdb.User, error) // 含软删除，用于注册时恢复
-	Restore(ctx context.Context, user *gormdb.User) error                               // 恢复软删除
+	GetByUsername(ctx context.Context, username string) (*gormdb.User, error)
+	GetByUsernameIncludingDeleted(ctx context.Context, username string) (*gormdb.User, error)
+	Restore(ctx context.Context, user *gormdb.User) error // 恢复软删除
 	GetByPhone(ctx context.Context, phone string) (*gormdb.User, error)
 	GetByUserID(ctx context.Context, userID string) (*gormdb.User, error)
 	Update(ctx context.Context, user *gormdb.User) error

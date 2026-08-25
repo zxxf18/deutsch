@@ -38,6 +38,8 @@ func genUsernameFromEmail(email string) string {
 
 func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.RegisterResponse, err error) {
 	resp = &types.RegisterResponse{}
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
+	req.Username = strings.TrimSpace(req.Username)
 
 	if req.Email == "" {
 		return nil, code.NewCodeError(code.CodeValidationError)
@@ -47,6 +49,20 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 	}
 	if req.InviteCode == "" {
 		return nil, code.NewCodeError(code.CodeInviteCodeRequired)
+	}
+
+	username := req.Username
+	if username == "" {
+		username = genUsernameFromEmail(req.Email)
+		for len(username) < 6 {
+			username += "0"
+		}
+		if len(username) > 50 {
+			username = username[:50]
+		}
+	}
+	if strings.Contains(username, "@") || len(username) < 6 || len(username) > 50 {
+		return nil, code.NewCodeError(code.CodeUsernameInvalid)
 	}
 
 	valid, _, err := l.svcCtx.InviteCodeRepo.Validate(l.ctx, req.InviteCode)
@@ -64,15 +80,13 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}
 
-	username := req.Username
-	if username == "" {
-		username = genUsernameFromEmail(req.Email)
+	usernameOwner, usernameErr := l.svcCtx.UserRepo.GetByUsernameIncludingDeleted(l.ctx, username)
+	if usernameErr != nil && usernameErr != gorm.ErrRecordNotFound {
+		l.Errorf("failed to get user by username: %+v", usernameErr)
+		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}
-	for len(username) < 6 {
-		username += "0"
-	}
-	if len(username) > 50 {
-		username = username[:50]
+	if usernameOwner != nil && (existed == nil || usernameOwner.ID != existed.ID) {
+		return nil, code.NewCodeError(code.CodeUsernameExists)
 	}
 
 	passwordEncrypted, err := l.svcCtx.PasswordCipher.Encrypt(req.Password)

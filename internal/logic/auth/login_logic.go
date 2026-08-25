@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"strings"
 
 	"deutsch/internal/code"
 	"deutsch/internal/pkg/jwt"
@@ -37,7 +38,11 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, err error) {
 	resp = &types.LoginResponse{}
 
-	if req.Email == "" && req.Phone == "" {
+	account := strings.TrimSpace(req.Account)
+	if account == "" {
+		account = strings.TrimSpace(req.Email)
+	}
+	if account == "" && req.Phone == "" {
 		return nil, code.NewCodeError(code.CodeValidationError)
 	}
 	if req.Password == "" {
@@ -45,8 +50,10 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 	}
 
 	var user *gormdb.User
-	if req.Email != "" {
-		user, err = l.svcCtx.UserRepo.GetByEmail(l.ctx, req.Email)
+	if account != "" && strings.Contains(account, "@") {
+		user, err = l.svcCtx.UserRepo.GetByEmail(l.ctx, strings.ToLower(account))
+	} else if account != "" {
+		user, err = l.svcCtx.UserRepo.GetByUsername(l.ctx, account)
 	} else {
 		user, err = l.svcCtx.UserRepo.GetByPhone(l.ctx, req.Phone)
 	}

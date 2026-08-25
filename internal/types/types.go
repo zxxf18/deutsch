@@ -278,6 +278,7 @@ type ListWrongQuestionsResponse struct {
 }
 
 type LoginRequest struct {
+	Account  string `json:"account,optional"`
 	Email    string `json:"email,optional"`
 	Phone    string `json:"phone,optional"`
 	Password string `json:"password"`
@@ -317,7 +318,7 @@ type RegisterRequest struct {
 	Email      string `json:"email"`
 	Password   string `json:"password"`
 	InviteCode string `json:"invite_code"`
-	Username   string `json:"username,optional"`
+	Username   string `json:"username,optional" validate:"omitempty,min=6,max=50"`
 	Nickname   string `json:"nickname,optional"`
 	Phone      string `json:"phone,optional"`
 }

@@ -25,8 +25,9 @@ type AuthResponse {
     } `json:"data"`
 }
 
-// LoginRequest 登录请求（不嵌入 User，避免 path:"id" 解析错误）
+// LoginRequest 登录请求，Account 可传用户名或邮箱
 type LoginRequest {
+    Account  string `json:"account,optional"`
     Email    string `json:"email,optional"`
     Phone    string `json:"phone,optional"`
     Password string `json:"password"`
@@ -37,7 +38,7 @@ type RegisterRequest {
     Email      string `json:"email"`
     Password   string `json:"password"`
     InviteCode string `json:"invite_code"`
-    Username   string `json:"username,optional"`
+    Username   string `json:"username,optional" validate:"omitempty,min=6,max=50"`
     Nickname   string `json:"nickname,optional"`
     Phone      string `json:"phone,optional"`
 }
@@ -84,6 +85,4 @@ service Deutsch {
 	@handler JwtRefreshHandler
 	post /jwt/refresh returns (JwtRefreshResponse)
 }
-
-
 

@@ -41,6 +41,24 @@ func (r *UserGormRepo) GetByEmailIncludingDeleted(ctx context.Context, email str
 	return &user, err
 }
 
+func (r *UserGormRepo) GetByUsername(ctx context.Context, username string) (*gormdb.User, error) {
+	var user gormdb.User
+	err := r.DB.WithContext(ctx).Where("username = ?", username).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	return &user, err
+}
+
+func (r *UserGormRepo) GetByUsernameIncludingDeleted(ctx context.Context, username string) (*gormdb.User, error) {
+	var user gormdb.User
+	err := r.DB.WithContext(ctx).Unscoped().Where("username = ?", username).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	return &user, err
+}
+
 func (r *UserGormRepo) Restore(ctx context.Context, user *gormdb.User) error {
 	return r.DB.WithContext(ctx).Unscoped().Model(user).Update("deleted_at", nil).Error
 }
