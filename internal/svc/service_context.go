@@ -4,6 +4,7 @@
 package svc
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -50,7 +51,31 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	}
 	assetsDir, _ = filepath.Abs(assetsDir)
 
-	auth := sso.New(sso.Config{Issuer: c.OIDC.Issuer, ClientID: c.OIDC.ClientID, ClientSecret: c.OIDC.ClientSecret, RedirectURL: c.OIDC.RedirectURL, SessionSecret: c.OIDC.SessionSecret, CookieName: c.OIDC.CookieName, AdminEmails: c.OIDC.AdminEmails})
+	issuer := c.OIDC.Issuer
+	if issuer == "" {
+		issuer = os.Getenv("DEUTSCH_OIDC_ISSUER")
+	}
+	clientID := c.OIDC.ClientID
+	if clientID == "" {
+		clientID = os.Getenv("DEUTSCH_OIDC_CLIENT_ID")
+	}
+	clientSecret := c.OIDC.ClientSecret
+	if clientSecret == "" {
+		clientSecret = os.Getenv("DEUTSCH_OIDC_CLIENT_SECRET")
+	}
+	redirectURL := c.OIDC.RedirectURL
+	if redirectURL == "" {
+		redirectURL = os.Getenv("DEUTSCH_OIDC_REDIRECT_URL")
+	}
+	sessionSecret := c.OIDC.SessionSecret
+	if sessionSecret == "" {
+		sessionSecret = os.Getenv("DEUTSCH_OIDC_SESSION_SECRET")
+	}
+	cookieName := c.OIDC.CookieName
+	if cookieName == "" {
+		cookieName = "deutsch_session"
+	}
+	auth := sso.New(sso.Config{Issuer: issuer, ClientID: clientID, ClientSecret: clientSecret, RedirectURL: redirectURL, SessionSecret: sessionSecret, CookieName: cookieName, AdminEmails: c.OIDC.AdminEmails})
 	return &ServiceContext{
 		Config:              c,
 		AssetsDir:           assetsDir,
