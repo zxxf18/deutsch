@@ -17,3 +17,12 @@ Redis:
   Host: "localhost:6379"
   Type: "node"
   Pass: ""
+
+OIDC:
+  Issuer: "https://sso.yebuluo.com.cn"
+  ClientID: "deutsch"
+  ClientSecret: "set-on-server"
+  RedirectURL: "https://deutsch.yebuluo.com.cn/auth/callback"
+  SessionSecret: "set-a-random-32-byte-secret-on-server"
+  CookieName: "deutsch_session"
+  AdminEmails: ""

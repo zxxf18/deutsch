@@ -20,6 +20,15 @@ type Config struct {
 	PasswordEncryption struct {
 		Key string // key material is SHA-256-derived for AES-256; inject through an untracked runtime config
 	}
-	Redis     redis.RedisConf
+	Redis redis.RedisConf
+	OIDC  struct {
+		Issuer        string
+		ClientID      string
+		ClientSecret  string
+		RedirectURL   string
+		SessionSecret string
+		CookieName    string
+		AdminEmails   string
+	}
 	AssetsDir string `json:",optional"` // 静态资源目录，默认 assets
 }

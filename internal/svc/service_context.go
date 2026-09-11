@@ -13,6 +13,7 @@ import (
 	"deutsch/internal/middleware"
 	"deutsch/internal/pkg/blacklist"
 	"deutsch/internal/pkg/passwordcrypto"
+	"deutsch/internal/sso"
 	"deutsch/model/gormdb"
 	"deutsch/model/repository"
 )
@@ -31,6 +32,8 @@ type ServiceContext struct {
 	QuestionRepo        repository.QuestionRepository
 	ProgressRepo        repository.ProgressRepository
 	PasswordCipher      *passwordcrypto.Cipher
+	SSO                 *sso.Service
+	SSOMiddleware       rest.Middleware
 }
 
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
@@ -47,6 +50,7 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	}
 	assetsDir, _ = filepath.Abs(assetsDir)
 
+	auth := sso.New(sso.Config{Issuer: c.OIDC.Issuer, ClientID: c.OIDC.ClientID, ClientSecret: c.OIDC.ClientSecret, RedirectURL: c.OIDC.RedirectURL, SessionSecret: c.OIDC.SessionSecret, CookieName: c.OIDC.CookieName, AdminEmails: c.OIDC.AdminEmails})
 	return &ServiceContext{
 		Config:              c,
 		AssetsDir:           assetsDir,
@@ -61,5 +65,7 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		QuestionRepo:        repository.NewQuestionGormRepo(gormdb.DB),
 		ProgressRepo:        repository.NewProgressGormRepo(gormdb.DB),
 		PasswordCipher:      passwordCipher,
+		SSO:                 auth,
+		SSOMiddleware:       middleware.NewSSOMiddleware(auth).Handle,
 	}, nil
 }

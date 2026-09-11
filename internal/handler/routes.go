@@ -8,9 +8,7 @@ import (
 	"time"
 
 	assets "deutsch/internal/handler/assets"
-	auth "deutsch/internal/handler/auth"
 	config "deutsch/internal/handler/config"
-	invitecode "deutsch/internal/handler/invitecode"
 	progress "deutsch/internal/handler/progress"
 	question "deutsch/internal/handler/question"
 	user "deutsch/internal/handler/user"
@@ -33,37 +31,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				Method:  http.MethodPost,
+				Method:  http.MethodGet,
 				Path:    "/login",
-				Handler: auth.LoginHandler(serverCtx),
+				Handler: serverCtx.SSO.Login,
 			},
 			{
-				Method:  http.MethodPost,
-				Path:    "/register",
-				Handler: auth.RegisterHandler(serverCtx),
+				Method:  http.MethodGet,
+				Path:    "/callback",
+				Handler: serverCtx.SSO.Callback,
 			},
 		},
-		rest.WithPrefix("/api/v1/auth"),
+		rest.WithPrefix("/auth"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)
-
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodPost,
-				Path:    "/jwt/refresh",
-				Handler: auth.JwtRefreshHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/logout",
-				Handler: auth.LogoutHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
-		rest.WithPrefix("/api/v1/auth"),
-		rest.WithTimeout(3000*time.Millisecond),
-	)
+	server.AddRoutes([]rest.Route{
+		{Method: http.MethodGet, Path: "/me", Handler: serverCtx.SSO.Me},
+		{Method: http.MethodPost, Path: "/logout", Handler: serverCtx.SSO.Logout},
+	}, rest.WithPrefix("/api/v1/auth"), rest.WithTimeout(3000*time.Millisecond))
 
 	server.AddRoutes(
 		[]rest.Route{
@@ -88,57 +72,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodGet,
-				Path:    "/validate/:id",
-				Handler: invitecode.ValidateHandler(serverCtx),
-			},
-		},
-		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
-		rest.WithPrefix("/api/v1/invitecode"),
-		rest.WithTimeout(3000*time.Millisecond),
-	)
-
-	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.AdminMiddleware},
-			[]rest.Route{
-				{
-					Method:  http.MethodGet,
-					Path:    "/:id",
-					Handler: invitecode.GetInviteCodeHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodDelete,
-					Path:    "/:id",
-					Handler: invitecode.DeleteHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPatch,
-					Path:    "/:id/enable",
-					Handler: invitecode.EnableHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPost,
-					Path:    "/generate",
-					Handler: invitecode.GenerateHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodGet,
-					Path:    "/list",
-					Handler: invitecode.ListHandler(serverCtx),
-				},
-			}...,
-		),
-		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
-		rest.WithPrefix("/api/v1/invitecode"),
-		rest.WithTimeout(3000*time.Millisecond),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.JWTMiddleware},
+			[]rest.Middleware{serverCtx.SSOMiddleware},
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
@@ -192,7 +127,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/progress"),
 		rest.WithTimeout(5000*time.Millisecond),
 	)
@@ -216,7 +150,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.JWTMiddleware},
+			[]rest.Middleware{serverCtx.SSOMiddleware},
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
@@ -245,14 +179,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/questions"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.JWTMiddleware},
+			[]rest.Middleware{serverCtx.SSOMiddleware},
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
@@ -266,14 +199,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/user"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)
 
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.AdminMiddleware},
+			[]rest.Middleware{serverCtx.SSOMiddleware, serverCtx.AdminMiddleware},
 			[]rest.Route{
 				{
 					Method:  http.MethodDelete,
@@ -292,7 +224,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-		rest.WithJwt(serverCtx.Config.JWTAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/user"),
 		rest.WithTimeout(3000*time.Millisecond),
 	)
