@@ -423,8 +423,8 @@ type UpdatePreferencesResponse struct {
 }
 
 type UpdateUserRequest struct {
-	Nickname    string `json:"nickname,optional" validate:"omitempty,max=50"`
-	Description string `json:"description,optional" validate:"omitempty,max=500"`
+	Nickname    *string `json:"nickname,optional" validate:"omitempty,max=50"`
+	Description *string `json:"description,optional" validate:"omitempty,max=500"`
 }
 
 type UpdateUserResponse struct {

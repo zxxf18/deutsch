@@ -45,7 +45,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		rest.WithTimeout(3000*time.Millisecond),
 	)
 	server.AddRoutes([]rest.Route{
-		{Method: http.MethodGet, Path: "/me", Handler: serverCtx.SSO.Me},
+		{Method: http.MethodGet, Path: "/me", Handler: user.MeHandler(serverCtx)},
 		{Method: http.MethodPost, Path: "/logout", Handler: serverCtx.SSO.Logout},
 	}, rest.WithPrefix("/api/v1/auth"), rest.WithTimeout(3000*time.Millisecond))
 

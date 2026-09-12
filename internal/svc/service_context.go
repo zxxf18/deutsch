@@ -91,6 +91,6 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		ProgressRepo:        repository.NewProgressGormRepo(gormdb.DB),
 		PasswordCipher:      passwordCipher,
 		SSO:                 auth,
-		SSOMiddleware:       middleware.NewSSOMiddleware(auth).Handle,
+		SSOMiddleware:       middleware.NewSSOMiddleware(auth, repository.NewUserGormRepo(gormdb.DB)).Handle,
 	}, nil
 }

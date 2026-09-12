@@ -38,6 +38,13 @@ type session struct {
 }
 type stateKey struct{}
 
+type Identity struct{ Subject, Email, Username, DisplayName, Role string }
+
+func IdentityFromContext(ctx context.Context) (Identity, bool) {
+	v, ok := ctx.Value(stateKey{}).(session)
+	return Identity{Subject: v.Subject, Email: v.Email, Username: v.Username, DisplayName: v.DisplayName, Role: v.Role}, ok
+}
+
 func SessionFromContext(ctx context.Context) (subject, role string, ok bool) {
 	v, ok := ctx.Value(stateKey{}).(session)
 	if !ok {

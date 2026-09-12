@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"unicode/utf8"
 
 	"deutsch/internal/code"
 	"deutsch/internal/common"
@@ -43,16 +44,18 @@ func (l *UpdateUserLogic) UpdateUser(req *types.UpdateUserRequest) (resp *types.
 		return nil, code.NewCodeError(code.CodeDatabaseError)
 	}
 
-	if req.Nickname != "" {
-		if len(req.Nickname) > 50 {
+	if req.Nickname != nil {
+		if utf8.RuneCountInString(*req.Nickname) > 50 {
 			return nil, code.NewCodeError(code.CodeNicknameTooLong)
 		}
-		user.Nickname = req.Nickname
+		user.Nickname = *req.Nickname
 	}
-	if len(req.Description) > 500 {
-		return nil, code.NewCodeError(code.CodeDescriptionTooLong)
+	if req.Description != nil {
+		if utf8.RuneCountInString(*req.Description) > 500 {
+			return nil, code.NewCodeError(code.CodeDescriptionTooLong)
+		}
+		user.Description = *req.Description
 	}
-	user.Description = req.Description
 
 	if err := l.svcCtx.UserRepo.Update(l.ctx, user); err != nil {
 		l.Errorf("failed to update user: %+v", err)
