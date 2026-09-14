@@ -27,6 +27,7 @@ type ensureUserFake struct {
 	createErr       error
 	createCount     int
 	failAfterCreate bool
+	duplicateEmail  bool
 }
 
 func newEnsureUserFake() *ensureUserFake {
@@ -56,11 +57,29 @@ func (f *ensureUserFake) Create(_ context.Context, user *gormdb.User) error {
 		}
 		return f.createErr
 	}
+	if f.duplicateEmail {
+		for _, existing := range f.users {
+			if existing.Email == user.Email {
+				return errors.New("duplicate email")
+			}
+		}
+	}
 	if _, exists := f.users[user.ID]; exists {
 		return errors.New("duplicate user id")
 	}
 	f.users[user.ID] = user
 	return nil
+}
+
+func (f *ensureUserFake) GetByEmail(_ context.Context, email string) (*gormdb.User, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	for _, u := range f.users {
+		if u.Email == email {
+			return u, nil
+		}
+	}
+	return nil, gorm.ErrRecordNotFound
 }
 
 func TestEnsureSSOUserCreatesByImmutableUUIDSubjectWithoutPassword(t *testing.T) {
@@ -189,6 +208,29 @@ func TestEnsureSSOUserRereadsAfterConcurrentCreateRace(t *testing.T) {
 	}
 	if got == nil || got.ID != sub {
 		t.Fatalf("reread returned unexpected user: %+v", got)
+	}
+}
+
+func TestEnsureSSOUserLinksExistingProfileByVerifiedEmail(t *testing.T) {
+	repo := newEnsureUserFake()
+	legacyID := uuid.NewString()
+	repo.users[legacyID] = &gormdb.User{
+		ID: legacyID, Username: "admin", Email: "admin@example.com",
+		Nickname: "保留的昵称", Description: "保留的学习进度", Role: "admin", IsEnabled: true,
+	}
+	repo.duplicateEmail = true
+
+	got, err := EnsureSSOUser(context.Background(), repo, sso.Identity{
+		Subject: uuid.NewString(), Email: "admin@example.com", Username: "admin", Role: "admin",
+	})
+	if err != nil {
+		t.Fatalf("existing verified email should link profile: %v", err)
+	}
+	if got == nil || got.ID != legacyID {
+		t.Fatalf("linked profile ID = %v, want existing %v", got, legacyID)
+	}
+	if got.Nickname != "保留的昵称" || got.Description != "保留的学习进度" {
+		t.Fatalf("existing profile was not preserved: %+v", got)
 	}
 }
 

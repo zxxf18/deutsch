@@ -38,9 +38,28 @@ func EnsureSSOUser(ctx context.Context, repo repository.UserRepository, identity
 		}
 		user = &gormdb.User{ID: identity.Subject, Username: identity.Username, Email: identity.Email, Nickname: string(nickname), Role: role, IsEnabled: true}
 		if err = repo.Create(ctx, user); err != nil {
-			// A concurrent first request may have won the unique primary-key insert.
-			// Re-read ONLY this subject; an email collision cannot link another user.
-			user, err = repo.GetByUserID(ctx, identity.Subject)
+			createErr := err
+			// A concurrent first request may have won the insert, or the business
+			// profile may predate SSO and already own this verified email. Re-read
+			// the immutable subject first, then use the verified email as the
+			// migration key to preserve the existing business ID and progress.
+			var subjectErr error
+			user, subjectErr = repo.GetByUserID(ctx, identity.Subject)
+			if subjectErr == nil {
+				err = nil
+			} else if !errors.Is(subjectErr, gorm.ErrRecordNotFound) {
+				err = subjectErr
+			} else {
+				var emailErr error
+				user, emailErr = repo.GetByEmail(ctx, identity.Email)
+				if emailErr == nil {
+					err = nil
+				} else {
+					// Keep the original create error for a missing email match. This
+					// avoids hiding the actual database constraint or outage.
+					err = createErr
+				}
+			}
 		}
 	}
 	if err != nil {
