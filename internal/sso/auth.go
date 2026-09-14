@@ -148,6 +148,7 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, s.authURL+"?"+q.Encode(), 302)
 }
 func (s *Service) Callback(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
 	s.init(r.Context())
 	if s.err != nil {
 		http.Error(w, "SSO is not configured", 503)
@@ -155,12 +156,13 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 	c, err := r.Cookie("sso_state")
 	if err != nil {
-		http.Error(w, "invalid SSO state", 400)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 	p := strings.SplitN(c.Value, "|", 3)
 	if len(p) != 3 || p[0] == "" || p[1] == "" || !hmac.Equal([]byte(p[0]), []byte(r.URL.Query().Get("state"))) {
-		http.Error(w, "invalid SSO state", 400)
+		setCookie(w, "sso_state", "", -1)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 	raw, err := s.exchange(r.Context(), r.URL.Query().Get("code"))

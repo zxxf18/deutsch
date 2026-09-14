@@ -162,7 +162,7 @@ func TestCallbackRejectsInvalidIdentity(t *testing.T) {
 			w := runCallback(t, tc.mutate, tc.tamper, tc.badSignature)
 			want := http.StatusForbidden
 			if tc.name == "missing state" {
-				want = http.StatusBadRequest
+				want = http.StatusSeeOther
 			}
 			if w.Code != want {
 				t.Fatalf("callback status = %d, want %d, body=%s", w.Code, want, w.Body.String())
@@ -177,8 +177,8 @@ func TestCallbackRejectsStateMismatch(t *testing.T) {
 		q.Set("state", "wrong-state")
 		r.URL.RawQuery = q.Encode()
 	}, false)
-	if w.Code != http.StatusBadRequest {
-		t.Fatalf("callback status = %d, want %d", w.Code, http.StatusBadRequest)
+	if w.Code != http.StatusSeeOther {
+		t.Fatalf("callback status = %d, want %d", w.Code, http.StatusSeeOther)
 	}
 }
 
