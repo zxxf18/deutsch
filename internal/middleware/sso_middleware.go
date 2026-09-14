@@ -35,7 +35,7 @@ func (m *SSOMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		r = r.WithContext(common.WithUserID(r.Context(), user.ID))
-		r = r.WithContext(common.WithRole(r.Context(), identity.Role))
+		r = r.WithContext(common.WithRole(r.Context(), user.Role))
 		next(w, r)
 	})
 }

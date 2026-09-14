@@ -22,7 +22,7 @@ func MeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		httpx.OkJsonCtx(r.Context(), w, map[string]any{
 			"sub": user.ID, "username": identity.Username, "email": identity.Email,
 			"display_name": user.Nickname, "description": user.Description,
-			"role": identity.Role, "email_verified": true,
+			"role": user.Role, "email_verified": true,
 		})
 	})
 }
