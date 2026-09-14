@@ -36,6 +36,22 @@ type session struct {
 	Role          string `json:"role"`
 	ExpiresAt     int64  `json:"exp"`
 }
+type verifiedClaim bool
+
+func (v *verifiedClaim) UnmarshalJSON(data []byte) error {
+	var b bool
+	if err := json.Unmarshal(data, &b); err == nil {
+		*v = verifiedClaim(b)
+		return nil
+	}
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	*v = verifiedClaim(strings.EqualFold(strings.TrimSpace(s), "true"))
+	return nil
+}
+
 type stateKey struct{}
 
 type Identity struct{ Subject, Email, Username, DisplayName, Role string }
@@ -154,12 +170,12 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 	claims := struct {
 		jwt.RegisteredClaims
-		AuthorizedParty   string `json:"azp"`
-		Nonce             string `json:"nonce"`
-		Email             string `json:"email"`
-		EmailVerified     bool   `json:"email_verified"`
-		PreferredUsername string `json:"preferred_username"`
-		Name              string `json:"name"`
+		AuthorizedParty   string        `json:"azp"`
+		Nonce             string        `json:"nonce"`
+		Email             string        `json:"email"`
+		EmailVerified     verifiedClaim `json:"email_verified"`
+		PreferredUsername string        `json:"preferred_username"`
+		Name              string        `json:"name"`
 	}{}
 	tok, err := jwt.ParseWithClaims(raw, &claims, func(t *jwt.Token) (any, error) {
 		if t.Method != jwt.SigningMethodRS256 {
@@ -174,7 +190,7 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request) {
 	})
 	// RegisteredClaims accepts both OIDC audience encodings, including Casdoor's array.
 	partyValid := claims.AuthorizedParty == s.cfg.ClientID || (claims.AuthorizedParty == "" && len(claims.Audience) == 1)
-	if err != nil || tok == nil || !tok.Valid || claims.Issuer != strings.TrimSuffix(s.cfg.Issuer, "/") || !claims.VerifyAudience(s.cfg.ClientID, true) || !partyValid || claims.Nonce != p[1] || claims.ExpiresAt == nil || strings.TrimSpace(claims.Subject) == "" || !claims.EmailVerified || strings.TrimSpace(claims.Email) == "" {
+	if err != nil || tok == nil || !tok.Valid || claims.Issuer != strings.TrimSuffix(s.cfg.Issuer, "/") || !claims.VerifyAudience(s.cfg.ClientID, true) || !partyValid || claims.Nonce != p[1] || claims.ExpiresAt == nil || strings.TrimSpace(claims.Subject) == "" || !bool(claims.EmailVerified) || strings.TrimSpace(claims.Email) == "" {
 		http.Error(w, "invalid or unverified SSO identity", 403)
 		return
 	}

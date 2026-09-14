@@ -3,6 +3,7 @@ package sso
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -178,5 +179,14 @@ func TestCallbackRejectsStateMismatch(t *testing.T) {
 	}, false)
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("callback status = %d, want %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+func TestVerifiedClaimAcceptsBooleanAndString(t *testing.T) {
+	for _, raw := range []string{`true`, `"true"`} {
+		var got verifiedClaim
+		if err := json.Unmarshal([]byte(raw), &got); err != nil || !bool(got) {
+			t.Fatalf("email_verified %s parsed as %v (err=%v)", raw, got, err)
+		}
 	}
 }
