@@ -203,28 +203,4 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		rest.WithTimeout(3000*time.Millisecond),
 	)
 
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.SSOMiddleware, serverCtx.AdminMiddleware},
-			[]rest.Route{
-				{
-					Method:  http.MethodDelete,
-					Path:    "/:id",
-					Handler: user.DeleteUserHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPatch,
-					Path:    "/:id/enable",
-					Handler: user.EnableUserHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodGet,
-					Path:    "/list",
-					Handler: user.ListUserHandler(serverCtx),
-				},
-			}...,
-		),
-		rest.WithPrefix("/api/v1/user"),
-		rest.WithTimeout(3000*time.Millisecond),
-	)
 }

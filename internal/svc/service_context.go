@@ -26,7 +26,6 @@ type ServiceContext struct {
 	TokenBlacklist      *blacklist.TokenBlacklist
 	JWTMiddleware       rest.Middleware
 	BlacklistMiddleware rest.Middleware
-	AdminMiddleware     rest.Middleware
 	UserRepo            repository.UserRepository
 	InviteCodeRepo      repository.InviteCodeRepository
 	ConfigRepo          repository.ConfigRepository
@@ -83,7 +82,6 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		TokenBlacklist:      tokenBlacklist,
 		JWTMiddleware:       middleware.NewJWTMiddleware(c).Handle,
 		BlacklistMiddleware: middleware.NewBlacklistMiddleware(tokenBlacklist).Handle,
-		AdminMiddleware:     middleware.NewAdminMiddleware(c).Handle,
 		UserRepo:            repository.NewUserGormRepo(gormdb.DB),
 		InviteCodeRepo:      repository.NewInviteGormRepo(gormdb.DB),
 		ConfigRepo:          repository.NewConfigGormRepo(gormdb.DB),
