@@ -1,5 +1,7 @@
 FROM scratch
 
+COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
 WORKDIR /app
 
 COPY dist/deutsch-linux-amd64 /app/deutsch
